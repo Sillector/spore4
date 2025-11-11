@@ -8,6 +8,9 @@ const SYSTEM_SPEED = 9;
 
 const pointer = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
+const tempTarget = new THREE.Vector3();
+const tempDirection = new THREE.Vector3();
+const lookTarget = new THREE.Vector3();
 
 export function createSpaceGame(container) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -86,6 +89,36 @@ export function createSpaceGame(container) {
   };
 
   const clock = new THREE.Clock();
+
+  function createPointTarget(position) {
+    return { type: 'point', position: position.clone() };
+  }
+
+  function createFollowTarget(mesh, altitude = 0) {
+    return { type: 'follow', mesh, altitude };
+  }
+
+  function resolveTargetPosition(target) {
+    if (!target) return null;
+    if (target.type === 'point') {
+      tempTarget.copy(target.position);
+      return tempTarget;
+    }
+    if (target.type === 'follow' && target.mesh) {
+      target.mesh.getWorldPosition(tempTarget);
+      if (target.altitude !== 0) {
+        tempDirection.copy(tempTarget);
+        if (tempDirection.lengthSq() > 1e-6) {
+          tempDirection.normalize();
+          tempTarget.addScaledVector(tempDirection, target.altitude);
+        } else {
+          tempTarget.z += target.altitude;
+        }
+      }
+      return tempTarget;
+    }
+    return null;
+  }
 
   createBackgroundNebula(scene);
   populateGalaxy(galaxyGroup, state);
@@ -209,18 +242,13 @@ export function createSpaceGame(container) {
 
   function moveShipToStar(starData) {
     state.currentStar = starData;
-    const target = starData.mesh.position.clone();
-    state.shipTarget = target;
+    state.shipTarget = createFollowTarget(starData.mesh, 6);
     state.shipSpeed = SHIP_SPEED;
   }
 
   function moveShipToPlanet(planetData) {
     state.currentPlanet = planetData;
-    const direction = planetData.mesh.position.clone().normalize();
-    const target = planetData.mesh.position
-      .clone()
-      .addScaledVector(direction, planetData.radius + 2);
-    state.shipTarget = target;
+    state.shipTarget = createFollowTarget(planetData.mesh, planetData.radius + 3);
     state.shipSpeed = SYSTEM_SPEED;
   }
 
@@ -239,7 +267,7 @@ export function createSpaceGame(container) {
     scene.add(system.group);
 
     ship.position.set(0, 0, 35);
-    state.shipTarget = new THREE.Vector3(0, 0, 25);
+    state.shipTarget = createPointTarget(new THREE.Vector3(0, 0, 25));
     state.shipSpeed = SYSTEM_SPEED;
 
     camera.position.set(0, 20, 55);
@@ -376,9 +404,10 @@ export function createSpaceGame(container) {
       systemWrapper.group.visible = true;
     }
     state.level = 'system';
-    state.shipTarget = state.currentPlanet.mesh.position
-      .clone()
-      .addScaledVector(state.currentPlanet.mesh.position.clone().normalize(), state.currentPlanet.radius + 3);
+    state.shipTarget = createFollowTarget(
+      state.currentPlanet.mesh,
+      state.currentPlanet.radius + 3
+    );
     state.shipSpeed = SYSTEM_SPEED;
   }
 
@@ -397,7 +426,9 @@ export function createSpaceGame(container) {
     galaxyGroup.visible = true;
     camera.position.set(0, 35, 110);
     camera.lookAt(0, 0, 0);
-    state.shipTarget = state.currentStar ? state.currentStar.mesh.position.clone() : new THREE.Vector3();
+    state.shipTarget = state.currentStar
+      ? createFollowTarget(state.currentStar.mesh, 6)
+      : createPointTarget(new THREE.Vector3());
     state.shipSpeed = SHIP_SPEED;
   }
 
@@ -470,15 +501,21 @@ export function createSpaceGame(container) {
     const delta = clock.getDelta();
 
     if (state.shipTarget) {
-      const toTarget = state.shipTarget.clone().sub(ship.position);
-      const distance = toTarget.length();
-      if (distance > 0.1) {
-        const dir = toTarget.normalize();
-        const moveSpeed = state.shipSpeed * delta;
-        ship.position.addScaledVector(dir, Math.min(moveSpeed, distance));
-        ship.lookAt(ship.position.clone().add(dir));
+      const targetPosition = resolveTargetPosition(state.shipTarget);
+      if (targetPosition) {
+        tempDirection.copy(targetPosition).sub(ship.position);
+        const distance = tempDirection.length();
+        if (distance > 0.1) {
+          tempDirection.normalize();
+          const moveSpeed = state.shipSpeed * delta;
+          ship.position.addScaledVector(tempDirection, Math.min(moveSpeed, distance));
+          lookTarget.copy(ship.position).add(tempDirection);
+          ship.lookAt(lookTarget);
+        } else {
+          ship.position.copy(targetPosition);
+          state.shipTarget = null;
+        }
       } else {
-        ship.position.copy(state.shipTarget);
         state.shipTarget = null;
       }
     }
