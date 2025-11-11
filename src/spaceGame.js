@@ -3,6 +3,7 @@ import * as THREE from 'three';
 const STAR_COUNT = 70;
 const PLANETS_PER_SYSTEM = 6;
 const GALAXY_RADIUS = 120;
+const GALAXY_THICKNESS = 14;
 const SHIP_SPEED = 12;
 const SYSTEM_SPEED = 9;
 const GALAXY_ZOOM_STEP = 0.25;
@@ -100,6 +101,10 @@ export function createSpaceGame(container) {
       galaxy: 0,
       system: 0
     },
+    zoomSmooth: {
+      galaxy: 0,
+      system: 0
+    },
     orbitZoomBuffer: 0
   };
 
@@ -157,6 +162,7 @@ export function createSpaceGame(container) {
     }
     camera.position.copy(ship.position).add(galaxyBaseOffset);
     camera.lookAt(ship.position);
+    state.zoomSmooth.galaxy = state.zoomProgress.galaxy;
   }
 
   const resizeObserver = new ResizeObserver(() => {
@@ -294,10 +300,12 @@ export function createSpaceGame(container) {
     const temp = new THREE.Vector3();
     for (let i = 0; i < STAR_COUNT; i += 1) {
       const star = createStar();
-      const radius = Math.cbrt(Math.random()) * GALAXY_RADIUS;
+      const radius = Math.sqrt(Math.random()) * GALAXY_RADIUS;
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-      temp.setFromSphericalCoords(radius, phi, theta);
+      const distanceFactor = 1 - radius / GALAXY_RADIUS;
+      const heightRange = THREE.MathUtils.lerp(0.6, GALAXY_THICKNESS * 0.17, distanceFactor);
+      const y = THREE.MathUtils.randFloatSpread(heightRange);
+      temp.set(Math.cos(theta) * radius, y, Math.sin(theta) * radius);
       star.position.copy(temp);
       star.userData.position = temp.clone();
       star.userData.systemSeed = Math.random();
@@ -333,6 +341,7 @@ export function createSpaceGame(container) {
     state.shipTarget = createFollowTarget(starData.mesh, 6);
     state.shipSpeed = SHIP_SPEED;
     state.zoomProgress.galaxy = 0;
+    state.zoomSmooth.galaxy = 0;
   }
 
   function moveShipToPlanet(planetData) {
@@ -340,6 +349,7 @@ export function createSpaceGame(container) {
     state.shipTarget = createFollowTarget(planetData.mesh, planetData.radius + 3);
     state.shipSpeed = SYSTEM_SPEED;
     state.zoomProgress.system = 0;
+    state.zoomSmooth.system = 0;
   }
 
   function enterSystem(starData) {
@@ -366,6 +376,8 @@ export function createSpaceGame(container) {
     state.zoomProgress.system = 0;
     state.orbitZoomBuffer = 0;
     state.zoomProgress.galaxy = 0;
+    state.zoomSmooth.system = 0;
+    state.zoomSmooth.galaxy = 0;
     state.level = 'system';
   }
 
@@ -485,6 +497,7 @@ export function createSpaceGame(container) {
     state.orbitMotion.radius = THREE.MathUtils.clamp(25, ORBIT_RADIUS_MIN, ORBIT_RADIUS_MAX);
     state.shipTarget = null;
     state.orbitZoomBuffer = 0;
+    state.zoomSmooth.system = 0;
     updateShipOrbitPosition();
 
     camera.position.set(0, 0, 35);
@@ -506,6 +519,7 @@ export function createSpaceGame(container) {
     state.shipSpeed = SYSTEM_SPEED;
     state.orbitZoomBuffer = 0;
     state.zoomProgress.system = 0;
+    state.zoomSmooth.system = 0;
   }
 
   function returnToGalaxy() {
@@ -534,6 +548,8 @@ export function createSpaceGame(container) {
     state.zoomProgress.galaxy = 0;
     state.zoomProgress.system = 0;
     state.orbitZoomBuffer = 0;
+    state.zoomSmooth.galaxy = 0;
+    state.zoomSmooth.system = 0;
   }
 
   function updateShipOrbitPosition(delta = 0) {
@@ -573,25 +589,41 @@ export function createSpaceGame(container) {
     const offsetZ = THREE.MathUtils.lerp(6, 16, radiusT);
     cameraOffset.set(0, offsetY, offsetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
-    camera.position.lerp(cameraTarget, 0.12);
+    const followAlpha = THREE.MathUtils.clamp(delta * 5, 0.05, 0.2);
+    camera.position.lerp(cameraTarget, followAlpha);
     camera.lookAt(ship.position);
   }
 
-  function updateGalaxyCamera() {
-    const zoom = state.zoomProgress.galaxy;
+  function updateGalaxyCamera(delta = 1 / 60) {
+    const targetZoom = state.zoomProgress.galaxy;
+    state.zoomSmooth.galaxy = THREE.MathUtils.damp(
+      state.zoomSmooth.galaxy,
+      targetZoom,
+      6,
+      delta
+    );
+    const zoom = state.zoomSmooth.galaxy;
     const targetY = THREE.MathUtils.lerp(35, 24, zoom);
     const targetZ = THREE.MathUtils.lerp(110, 78, zoom);
     cameraOffset.set(0, targetY, targetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
-    camera.position.lerp(cameraTarget, 0.08);
+    const followAlpha = THREE.MathUtils.clamp(delta * 4.5, 0.05, 0.16);
+    camera.position.lerp(cameraTarget, followAlpha);
     camera.lookAt(ship.position);
     const baseTilt = THREE.MathUtils.degToRad(45);
     const tiltRange = THREE.MathUtils.degToRad(35);
     galaxyGroup.rotation.x = baseTilt + tiltRange * zoom;
   }
 
-  function updateSystemCamera() {
-    const zoom = state.zoomProgress.system;
+  function updateSystemCamera(delta = 1 / 60) {
+    const targetZoom = state.zoomProgress.system;
+    state.zoomSmooth.system = THREE.MathUtils.damp(
+      state.zoomSmooth.system,
+      targetZoom,
+      6,
+      delta
+    );
+    const zoom = state.zoomSmooth.system;
     let offsetY = 12;
     let offsetZ = 35;
     if (zoom >= 0) {
@@ -604,7 +636,8 @@ export function createSpaceGame(container) {
     }
     cameraOffset.set(0, offsetY, offsetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
-    camera.position.lerp(cameraTarget, 0.08);
+    const followAlpha = THREE.MathUtils.clamp(delta * 4.5, 0.05, 0.16);
+    camera.position.lerp(cameraTarget, followAlpha);
     camera.lookAt(ship.position);
   }
 
@@ -623,16 +656,20 @@ export function createSpaceGame(container) {
       const y = Math.sin(phi) * Math.sin(theta) * radius;
       const z = Math.cos(phi) * radius;
       positions.push(x, y, z);
-      color.setHSL(0.55 + Math.random() * 0.1, 0.6, 0.5 + Math.random() * 0.2);
+      color.setHSL(
+        0.55 + Math.random() * 0.08,
+        0.55,
+        0.26 + Math.random() * 0.12
+      );
       colors.push(color.r, color.g, color.b);
     }
 
     starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     starsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     const starsMaterial = new THREE.PointsMaterial({
-      size: 1.2,
+      size: 0.9,
       vertexColors: true,
-      opacity: 0.8,
+      opacity: 0.38,
       transparent: true
     });
 
@@ -646,26 +683,33 @@ export function createSpaceGame(container) {
     if (state.shipTarget) {
       const targetPosition = resolveTargetPosition(state.shipTarget);
       if (targetPosition) {
-        tempDirection.copy(targetPosition).sub(ship.position);
-        const distance = tempDirection.length();
-        const moveSpeed = state.shipSpeed * delta;
         const isFollow = state.shipTarget.type === 'follow';
-        if (distance > 0.05) {
-          tempDirection.normalize();
-          ship.position.addScaledVector(tempDirection, Math.min(moveSpeed, distance));
+        if (isFollow) {
+          const followAlpha = THREE.MathUtils.clamp(delta * 8, 0.08, 0.55);
+          ship.position.lerp(targetPosition, followAlpha);
         } else {
-          ship.position.copy(targetPosition);
+          tempDirection.copy(targetPosition).sub(ship.position);
+          const distance = tempDirection.length();
+          const moveSpeed = state.shipSpeed * delta;
+          if (distance > 0.05) {
+            tempDirection.normalize();
+            ship.position.addScaledVector(tempDirection, Math.min(moveSpeed, distance));
+          } else {
+            ship.position.copy(targetPosition);
+            state.shipTarget = null;
+          }
         }
 
         if (isFollow && state.shipTarget.mesh) {
           state.shipTarget.mesh.getWorldPosition(followSource);
           lookTarget.copy(followSource);
           ship.lookAt(lookTarget);
-        } else if (distance > 0.05) {
-          lookTarget.copy(ship.position).add(tempDirection);
-          ship.lookAt(lookTarget);
         } else {
-          state.shipTarget = null;
+          tempDirection.copy(targetPosition).sub(ship.position);
+          if (tempDirection.lengthSq() > 1e-5) {
+            lookTarget.copy(ship.position).add(tempDirection.normalize());
+            ship.lookAt(lookTarget);
+          }
         }
       } else {
         state.shipTarget = null;
@@ -678,10 +722,10 @@ export function createSpaceGame(container) {
       if (state.currentSystem) {
         state.currentSystem.group.rotation.y += delta * 0.05;
       }
-      updateSystemCamera();
+      updateSystemCamera(delta);
     } else if (state.level === 'galaxy') {
       galaxyGroup.rotation.y += delta * 0.01;
-      updateGalaxyCamera();
+      updateGalaxyCamera(delta);
     } else if (state.level === 'transition') {
       camera.lookAt(ship.position);
     }
