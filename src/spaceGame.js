@@ -17,6 +17,7 @@ const tempDirection = new THREE.Vector3();
 const lookTarget = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
 const cameraOffset = new THREE.Vector3();
+const galaxyBaseOffset = new THREE.Vector3(0, 35, 110);
 const orbitTarget = new THREE.Vector3();
 const followSource = new THREE.Vector3();
 
@@ -47,6 +48,7 @@ export function createSpaceGame(container) {
   scene.add(dirLight);
 
   const galaxyGroup = new THREE.Group();
+  galaxyGroup.rotation.x = THREE.MathUtils.degToRad(45);
   galaxyGroup.name = 'Galaxy';
   scene.add(galaxyGroup);
 
@@ -136,6 +138,27 @@ export function createSpaceGame(container) {
   createBackgroundNebula(scene);
   populateGalaxy(galaxyGroup, state);
 
+  if (state.galaxyStars.length > 0) {
+    let closestStar = state.galaxyStars[0];
+    let closestDistanceSq = closestStar.position.lengthSq();
+    for (let i = 1; i < state.galaxyStars.length; i += 1) {
+      const candidate = state.galaxyStars[i];
+      const distanceSq = candidate.position.lengthSq();
+      if (distanceSq < closestDistanceSq) {
+        closestStar = candidate;
+        closestDistanceSq = distanceSq;
+      }
+    }
+    state.currentStar = closestStar;
+    state.shipTarget = createFollowTarget(state.currentStar.mesh, 6);
+    const initialPosition = resolveTargetPosition(state.shipTarget);
+    if (initialPosition) {
+      ship.position.copy(initialPosition);
+    }
+    camera.position.copy(ship.position).add(galaxyBaseOffset);
+    camera.lookAt(ship.position);
+  }
+
   const resizeObserver = new ResizeObserver(() => {
     camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
@@ -170,7 +193,7 @@ export function createSpaceGame(container) {
 
   function onWheel(event) {
     event.preventDefault();
-    const direction = Math.sign(event.deltaY);
+    const direction = -Math.sign(event.deltaY);
     if (direction === 0) return;
 
     if (state.level === 'galaxy') {
@@ -498,11 +521,15 @@ export function createSpaceGame(container) {
       orbitGroup = null;
     }
     galaxyGroup.visible = true;
-    camera.position.set(0, 35, 110);
-    camera.lookAt(0, 0, 0);
     state.shipTarget = state.currentStar
       ? createFollowTarget(state.currentStar.mesh, 6)
       : createPointTarget(new THREE.Vector3());
+    const resetPosition = resolveTargetPosition(state.shipTarget);
+    if (resetPosition) {
+      ship.position.copy(resetPosition);
+    }
+    camera.position.copy(ship.position).add(galaxyBaseOffset);
+    camera.lookAt(ship.position);
     state.shipSpeed = SHIP_SPEED;
     state.zoomProgress.galaxy = 0;
     state.zoomProgress.system = 0;
@@ -536,19 +563,31 @@ export function createSpaceGame(container) {
     orbitTarget.setFromSphericalCoords(orbit.radius, orbit.theta, orbit.phi);
     ship.position.copy(orbitTarget);
 
-    cameraOffset.set(0, 4, 6);
-    cameraTarget.copy(orbitTarget).add(cameraOffset);
+    const radiusT = THREE.MathUtils.clamp(
+      (orbit.radius - ORBIT_RADIUS_MIN) /
+        Math.max(ORBIT_RADIUS_MAX - ORBIT_RADIUS_MIN, 1),
+      0,
+      1
+    );
+    const offsetY = THREE.MathUtils.lerp(4, 10, radiusT);
+    const offsetZ = THREE.MathUtils.lerp(6, 16, radiusT);
+    cameraOffset.set(0, offsetY, offsetZ);
+    cameraTarget.copy(ship.position).add(cameraOffset);
     camera.position.lerp(cameraTarget, 0.12);
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(ship.position);
   }
 
   function updateGalaxyCamera() {
     const zoom = state.zoomProgress.galaxy;
     const targetY = THREE.MathUtils.lerp(35, 24, zoom);
     const targetZ = THREE.MathUtils.lerp(110, 78, zoom);
-    cameraTarget.set(0, targetY, targetZ);
+    cameraOffset.set(0, targetY, targetZ);
+    cameraTarget.copy(ship.position).add(cameraOffset);
     camera.position.lerp(cameraTarget, 0.08);
     camera.lookAt(ship.position);
+    const baseTilt = THREE.MathUtils.degToRad(45);
+    const tiltRange = THREE.MathUtils.degToRad(35);
+    galaxyGroup.rotation.x = baseTilt + tiltRange * zoom;
   }
 
   function updateSystemCamera() {
