@@ -18,7 +18,7 @@ const tempDirection = new THREE.Vector3();
 const lookTarget = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
 const cameraOffset = new THREE.Vector3();
-const galaxyBaseOffset = new THREE.Vector3(0, 35, 110);
+const galaxyBaseOffset = new THREE.Vector3(0, 52, 165);
 const orbitTarget = new THREE.Vector3();
 const followSource = new THREE.Vector3();
 
@@ -38,7 +38,7 @@ export function createSpaceGame(container) {
     0.1,
     1000
   );
-  camera.position.set(0, 35, 110);
+  camera.position.set(0, 52, 165);
 
   const ambient = new THREE.AmbientLight(0x6f83ff, 0.35);
   scene.add(ambient);
@@ -49,7 +49,7 @@ export function createSpaceGame(container) {
   scene.add(dirLight);
 
   const galaxyGroup = new THREE.Group();
-  galaxyGroup.rotation.x = THREE.MathUtils.degToRad(45);
+  galaxyGroup.rotation.x = THREE.MathUtils.degToRad(78);
   galaxyGroup.name = 'Galaxy';
   scene.add(galaxyGroup);
 
@@ -370,7 +370,7 @@ export function createSpaceGame(container) {
     state.shipTarget = createPointTarget(new THREE.Vector3(0, 0, 25));
     state.shipSpeed = SYSTEM_SPEED;
 
-    camera.position.set(0, 20, 55);
+    camera.position.set(0, 28, 82);
     camera.lookAt(0, 0, 0);
 
     state.zoomProgress.system = 0;
@@ -500,7 +500,7 @@ export function createSpaceGame(container) {
     state.zoomSmooth.system = 0;
     updateShipOrbitPosition();
 
-    camera.position.set(0, 0, 35);
+    camera.position.set(0, 0, 48);
     camera.lookAt(0, 0, 0);
   }
 
@@ -585,8 +585,8 @@ export function createSpaceGame(container) {
       0,
       1
     );
-    const offsetY = THREE.MathUtils.lerp(4, 10, radiusT);
-    const offsetZ = THREE.MathUtils.lerp(6, 16, radiusT);
+    const offsetY = THREE.MathUtils.lerp(6, 14, radiusT);
+    const offsetZ = THREE.MathUtils.lerp(10, 26, radiusT);
     cameraOffset.set(0, offsetY, offsetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
     const followAlpha = THREE.MathUtils.clamp(delta * 5, 0.05, 0.2);
@@ -603,16 +603,16 @@ export function createSpaceGame(container) {
       delta
     );
     const zoom = state.zoomSmooth.galaxy;
-    const targetY = THREE.MathUtils.lerp(35, 24, zoom);
-    const targetZ = THREE.MathUtils.lerp(110, 78, zoom);
+    const targetY = THREE.MathUtils.lerp(68, 38, zoom);
+    const targetZ = THREE.MathUtils.lerp(210, 135, zoom);
     cameraOffset.set(0, targetY, targetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
     const followAlpha = THREE.MathUtils.clamp(delta * 4.5, 0.05, 0.16);
     camera.position.lerp(cameraTarget, followAlpha);
     camera.lookAt(ship.position);
-    const baseTilt = THREE.MathUtils.degToRad(45);
-    const tiltRange = THREE.MathUtils.degToRad(35);
-    galaxyGroup.rotation.x = baseTilt + tiltRange * zoom;
+    const topTilt = THREE.MathUtils.degToRad(78);
+    const closeTilt = THREE.MathUtils.degToRad(45);
+    galaxyGroup.rotation.x = THREE.MathUtils.lerp(topTilt, closeTilt, zoom);
   }
 
   function updateSystemCamera(delta = 1 / 60) {
@@ -624,15 +624,15 @@ export function createSpaceGame(container) {
       delta
     );
     const zoom = state.zoomSmooth.system;
-    let offsetY = 12;
-    let offsetZ = 35;
+    let offsetY = 18;
+    let offsetZ = 48;
     if (zoom >= 0) {
-      offsetY = THREE.MathUtils.lerp(12, 6, zoom);
-      offsetZ = THREE.MathUtils.lerp(35, 24, zoom);
+      offsetY = THREE.MathUtils.lerp(18, 12, zoom);
+      offsetZ = THREE.MathUtils.lerp(48, 32, zoom);
     } else {
       const amount = -zoom;
-      offsetY = THREE.MathUtils.lerp(12, 18, amount);
-      offsetZ = THREE.MathUtils.lerp(35, 52, amount);
+      offsetY = THREE.MathUtils.lerp(18, 26, amount);
+      offsetZ = THREE.MathUtils.lerp(48, 72, amount);
     }
     cameraOffset.set(0, offsetY, offsetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
