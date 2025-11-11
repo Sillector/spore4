@@ -6,7 +6,8 @@ const GALAXY_RADIUS = 120;
 const GALAXY_THICKNESS = 14;
 const SHIP_SPEED = 12;
 const SYSTEM_SPEED = 9;
-const GALAXY_ZOOM_STEP = 0.25;
+const GALAXY_ZOOM_STEP = 0.16;
+const GALAXY_ENTER_THRESHOLD = 1.28;
 const SYSTEM_ZOOM_STEP = 0.25;
 const ORBIT_RADIUS_MIN = 20;
 const ORBIT_RADIUS_MAX = 40;
@@ -205,10 +206,10 @@ export function createSpaceGame(container) {
     if (state.level === 'galaxy') {
       if (direction > 0 && state.currentStar) {
         state.zoomProgress.galaxy = Math.min(
-          1,
+          GALAXY_ENTER_THRESHOLD,
           state.zoomProgress.galaxy + GALAXY_ZOOM_STEP
         );
-        if (state.zoomProgress.galaxy >= 1) {
+        if (state.zoomProgress.galaxy >= GALAXY_ENTER_THRESHOLD) {
           state.zoomProgress.galaxy = 0;
           enterSystem(state.currentStar);
         }
@@ -595,7 +596,7 @@ export function createSpaceGame(container) {
   }
 
   function updateGalaxyCamera(delta = 1 / 60) {
-    const targetZoom = state.zoomProgress.galaxy;
+    const targetZoom = Math.min(state.zoomProgress.galaxy, 1);
     state.zoomSmooth.galaxy = THREE.MathUtils.damp(
       state.zoomSmooth.galaxy,
       targetZoom,
@@ -603,8 +604,8 @@ export function createSpaceGame(container) {
       delta
     );
     const zoom = state.zoomSmooth.galaxy;
-    const targetY = THREE.MathUtils.lerp(68, 38, zoom);
-    const targetZ = THREE.MathUtils.lerp(210, 135, zoom);
+    const targetY = THREE.MathUtils.lerp(72, 34, zoom);
+    const targetZ = THREE.MathUtils.lerp(215, 122, zoom);
     cameraOffset.set(0, targetY, targetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
     const followAlpha = THREE.MathUtils.clamp(delta * 4.5, 0.05, 0.16);
