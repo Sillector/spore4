@@ -122,6 +122,12 @@ canvas {
   gap: 0.5rem;
 }
 
+.dev-panel__section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .dev-panel__section-header h3 {
   margin: 0;
   font-size: 0.95rem;
@@ -144,25 +150,93 @@ canvas {
   background: rgba(40, 70, 120, 0.9);
 }
 
-.dev-panel__editor {
-  width: 100%;
-  min-height: 160px;
-  margin-top: 0.5rem;
-  padding: 0.65rem;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(120, 180, 255, 0.2);
-  background: rgba(5, 15, 30, 0.75);
-  color: #d9e7ff;
-  font-family: 'Fira Code', 'Courier New', monospace;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  resize: vertical;
+.dev-panel__section-body {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
 }
 
-.dev-panel__editor:focus {
+.dev-panel__section--collapsed .dev-panel__section-body {
+  display: none;
+}
+
+.dev-panel__collapse {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(120, 180, 255, 0.25);
+  background: rgba(15, 25, 45, 0.65);
+  color: #e0f2ff;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.dev-panel__collapse:hover {
+  background: rgba(35, 55, 90, 0.8);
+}
+
+.dev-panel__section--collapsed .dev-panel__collapse {
+  transform: rotate(-90deg);
+}
+
+.dev-panel__group {
+  border: 1px solid rgba(120, 180, 255, 0.15);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(10, 20, 35, 0.6);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dev-panel__group-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(200, 220, 255, 0.75);
+}
+
+.dev-panel__group-content {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dev-panel__field {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.dev-panel__field-label {
+  color: rgba(220, 235, 255, 0.8);
+  letter-spacing: 0.02em;
+}
+
+.dev-panel__input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(120, 180, 255, 0.25);
+  background: rgba(8, 18, 32, 0.8);
+  color: #e0f2ff;
+  font-size: 0.8rem;
+}
+
+.dev-panel__input:focus {
   outline: none;
   border-color: rgba(140, 200, 255, 0.6);
   box-shadow: 0 0 0 2px rgba(120, 180, 255, 0.25);
+}
+
+.dev-panel__checkbox {
+  justify-self: start;
+  width: 1rem;
+  height: 1rem;
 }
 
 .dev-panel__status {

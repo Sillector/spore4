@@ -17,16 +17,121 @@ async function persistConfig(name, data) {
   }
 }
 
+function createFieldInput(value) {
+  if (typeof value === 'boolean') {
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = value;
+    input.dataset.configType = 'boolean';
+    input.className = 'dev-panel__checkbox';
+    return input;
+  }
+
+  const input = document.createElement('input');
+  input.type = typeof value === 'number' ? 'number' : 'text';
+  if (typeof value === 'number') {
+    input.step = 'any';
+  }
+  input.value = value;
+  input.dataset.configType = typeof value;
+  input.className = 'dev-panel__input';
+  return input;
+}
+
+function renderEntries(container, value, path) {
+  const entries = Array.isArray(value)
+    ? value.map((item, index) => [index, item])
+    : Object.entries(value);
+
+  for (const [key, childValue] of entries) {
+    const nextPath = path.concat(String(key));
+
+    if (childValue !== null && typeof childValue === 'object') {
+      const group = document.createElement('div');
+      group.className = 'dev-panel__group';
+
+      const groupLabel = document.createElement('div');
+      groupLabel.className = 'dev-panel__group-label';
+      groupLabel.textContent = key;
+      group.appendChild(groupLabel);
+
+      const groupContent = document.createElement('div');
+      groupContent.className = 'dev-panel__group-content';
+      renderEntries(groupContent, childValue, nextPath);
+      group.appendChild(groupContent);
+
+      container.appendChild(group);
+    } else {
+      const field = document.createElement('label');
+      field.className = 'dev-panel__field';
+
+      const label = document.createElement('span');
+      label.className = 'dev-panel__field-label';
+      label.textContent = key;
+      field.appendChild(label);
+
+      const input = createFieldInput(childValue);
+      input.dataset.configPath = nextPath.join('.');
+      field.appendChild(input);
+
+      container.appendChild(field);
+    }
+  }
+}
+
+function getInputValue(input) {
+  const type = input.dataset.configType;
+  if (type === 'boolean') {
+    return input.checked;
+  }
+  if (type === 'number') {
+    const parsed = Number(input.value);
+    if (Number.isNaN(parsed)) {
+      throw new Error('Некорректное число');
+    }
+    return parsed;
+  }
+  return input.value;
+}
+
+function assignValue(target, path, value) {
+  let current = target;
+  for (let i = 0; i < path.length - 1; i += 1) {
+    const key = path[i];
+    const actualKey = Array.isArray(current) ? Number(key) : key;
+    current = current[actualKey];
+  }
+
+  const lastKey = path[path.length - 1];
+  const actualLastKey = Array.isArray(current) ? Number(lastKey) : lastKey;
+  current[actualLastKey] = value;
+}
+
 function createSection(name) {
+  let data = getConfigSnapshot(name);
+
   const section = document.createElement('section');
   section.className = 'dev-panel__section';
 
   const header = document.createElement('div');
   header.className = 'dev-panel__section-header';
 
+  const heading = document.createElement('div');
+  heading.className = 'dev-panel__section-heading';
+
+  const collapseButton = document.createElement('button');
+  collapseButton.type = 'button';
+  collapseButton.className = 'dev-panel__collapse';
+  collapseButton.setAttribute('aria-label', `Переключить ${name}`);
+  collapseButton.setAttribute('aria-expanded', 'true');
+  collapseButton.textContent = '▾';
+  heading.appendChild(collapseButton);
+
   const title = document.createElement('h3');
   title.textContent = name;
-  header.appendChild(title);
+  heading.appendChild(title);
+
+  header.appendChild(heading);
 
   const saveButton = document.createElement('button');
   saveButton.type = 'button';
@@ -36,22 +141,52 @@ function createSection(name) {
 
   section.appendChild(header);
 
-  const textarea = document.createElement('textarea');
-  textarea.className = 'dev-panel__editor';
-  textarea.value = JSON.stringify(getConfigSnapshot(name), null, 2);
-  textarea.spellcheck = false;
-  section.appendChild(textarea);
+  const body = document.createElement('div');
+  body.className = 'dev-panel__section-body';
+  renderEntries(body, data, []);
+  section.appendChild(body);
 
   const status = createStatusElement();
   section.appendChild(status);
 
+  function toggleSection() {
+    const collapsed = section.classList.toggle('dev-panel__section--collapsed');
+    collapseButton.setAttribute('aria-expanded', String(!collapsed));
+  }
+
+  collapseButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleSection();
+  });
+
+  header.addEventListener('click', (event) => {
+    if (event.target.closest('.dev-panel__save')) {
+      return;
+    }
+    if (event.target.closest('.dev-panel__collapse')) {
+      return;
+    }
+    toggleSection();
+  });
+
   saveButton.addEventListener('click', async () => {
+    const inputs = Array.from(body.querySelectorAll('[data-config-path]'));
+    const snapshot = JSON.parse(JSON.stringify(data));
+
     try {
-      const parsed = JSON.parse(textarea.value);
+      for (const input of inputs) {
+        const value = getInputValue(input);
+        const path = input.dataset.configPath.split('.');
+        assignValue(snapshot, path, value);
+      }
+
       status.textContent = 'Сохраняем...';
       status.dataset.state = '';
-      await persistConfig(name, parsed);
-      updateConfig(name, parsed);
+
+      await persistConfig(name, snapshot);
+      updateConfig(name, snapshot);
+      data = getConfigSnapshot(name);
+
       status.textContent = 'Сохранено';
       status.dataset.state = 'success';
       setTimeout(() => {
