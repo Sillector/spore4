@@ -1,0 +1,47 @@
+:root {
+  color-scheme: dark;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #0b1a2f, #000);
+  color: #e0f2ff;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.info-panel {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(10, 15, 25, 0.72);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(120, 180, 255, 0.35);
+  max-width: 320px;
+  line-height: 1.45;
+  box-shadow: 0 0.75rem 2rem rgba(10, 50, 120, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.info-panel h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.info-panel p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+canvas {
+  display: block;
+}
