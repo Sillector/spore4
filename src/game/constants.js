@@ -1,0 +1,12 @@
+export const STAR_COUNT = 70;
+export const PLANETS_PER_SYSTEM = 6;
+export const GALAXY_RADIUS = 120;
+export const GALAXY_THICKNESS = 14;
+export const SHIP_SPEED = 12;
+export const SYSTEM_SPEED = 9;
+export const GALAXY_ZOOM_STEP = 0.16;
+export const GALAXY_ENTER_THRESHOLD = 1.28;
+export const SYSTEM_ZOOM_STEP = 0.25;
+export const ORBIT_RADIUS_MIN = 20;
+export const ORBIT_RADIUS_MAX = 40;
+export const GALAXY_BASE_OFFSET = Object.freeze({ x: 0, y: 52, z: 165 });
