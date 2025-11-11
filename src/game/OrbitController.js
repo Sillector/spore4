@@ -1,6 +1,10 @@
 import * as THREE from 'three';
-import { ORBIT_RADIUS_MIN, ORBIT_RADIUS_MAX, SYSTEM_SPEED } from './constants.js';
+import { getConfig } from '../config/store.js';
 import { createFollowTarget } from './targets.js';
+
+const orbitConfig = getConfig('orbit');
+const shipConfig = getConfig('ship');
+const systemConfig = getConfig('system');
 
 const cameraOffset = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
@@ -10,6 +14,7 @@ export class OrbitController {
   constructor(scene, state) {
     this.scene = scene;
     this.state = state;
+    this.config = orbitConfig;
     this.group = null;
   }
 
@@ -18,22 +23,32 @@ export class OrbitController {
     this.state.level = 'transition';
     this.group = new THREE.Group();
     const surface = new THREE.Mesh(
-      new THREE.SphereGeometry(18, 64, 64),
+      new THREE.SphereGeometry(
+        this.config.surface.radius,
+        this.config.surface.widthSegments,
+        this.config.surface.heightSegments
+      ),
       new THREE.MeshStandardMaterial({
         color: planetData.mesh.material.color.clone(),
-        roughness: 1,
-        metalness: 0.05
+        roughness: this.config.surface.material.roughness,
+        metalness: this.config.surface.material.metalness
       })
     );
     surface.receiveShadow = true;
     this.group.add(surface);
 
     const atmosphere = new THREE.Mesh(
-      new THREE.SphereGeometry(18.5, 48, 48),
+      new THREE.SphereGeometry(
+        this.config.atmosphere.radius,
+        this.config.atmosphere.widthSegments,
+        this.config.atmosphere.heightSegments
+      ),
       new THREE.MeshBasicMaterial({
-        color: planetData.mesh.material.color.clone().offsetHSL(0, -0.1, 0.2),
+        color: planetData.mesh.material.color
+          .clone()
+          .offsetHSL(0, this.config.atmosphere.saturationOffset, this.config.atmosphere.lightnessOffset),
         transparent: true,
-        opacity: 0.25,
+        opacity: this.config.atmosphere.opacity,
         side: THREE.DoubleSide
       })
     );
@@ -45,7 +60,11 @@ export class OrbitController {
     this.state.resetOrbitMotion();
     ship.clearTarget();
     this.updateShipPosition(ship);
-    camera.position.set(0, 0, 48);
+    camera.position.set(
+      this.config.camera.entryPosition.x,
+      this.config.camera.entryPosition.y,
+      this.config.camera.entryPosition.z
+    );
     camera.lookAt(0, 0, 0);
   }
 
@@ -54,8 +73,13 @@ export class OrbitController {
     this.scene.remove(this.group);
     this.group = null;
     if (planetData) {
-      ship.setTarget(createFollowTarget(planetData.mesh, planetData.radius + 3));
-      ship.setSpeed(SYSTEM_SPEED);
+      ship.setTarget(
+        createFollowTarget(
+          planetData.mesh,
+          planetData.radius + systemConfig.ship.approachOffset
+        )
+      );
+      ship.setSpeed(shipConfig.speeds.system);
     }
     this.state.level = 'system';
     this.state.orbitZoomBuffer = 0;
@@ -66,32 +90,45 @@ export class OrbitController {
     const orbit = this.state.orbitMotion;
     if (direction > 0) {
       orbit.radius = THREE.MathUtils.clamp(
-        orbit.radius - THREE.MathUtils.lerp(1.2, 3.6, magnitude),
-        ORBIT_RADIUS_MIN,
-        ORBIT_RADIUS_MAX
+        orbit.radius - THREE.MathUtils.lerp(
+          this.config.zoom.step.min,
+          this.config.zoom.step.max,
+          magnitude
+        ),
+        this.config.radius.min,
+        this.config.radius.max
       );
       this.state.orbitZoomBuffer = 0;
     } else {
       const previousRadius = orbit.radius;
       orbit.radius = THREE.MathUtils.clamp(
-        orbit.radius + THREE.MathUtils.lerp(1.2, 3.6, magnitude),
-        ORBIT_RADIUS_MIN,
-        ORBIT_RADIUS_MAX
+        orbit.radius + THREE.MathUtils.lerp(
+          this.config.zoom.step.min,
+          this.config.zoom.step.max,
+          magnitude
+        ),
+        this.config.radius.min,
+        this.config.radius.max
       );
       if (
-        orbit.radius >= ORBIT_RADIUS_MAX &&
-        previousRadius >= ORBIT_RADIUS_MAX - 0.5
+        orbit.radius >= this.config.radius.max &&
+        previousRadius >= this.config.radius.max - this.config.zoom.radiusExitThreshold
       ) {
         this.state.orbitZoomBuffer = Math.min(
           1,
-          this.state.orbitZoomBuffer + 0.25 + magnitude * 0.35
+          this.state.orbitZoomBuffer +
+            this.config.zoom.bufferIncrement +
+            magnitude * this.config.zoom.bufferMagnitudeMultiplier
         );
         if (this.state.orbitZoomBuffer >= 1) {
           this.state.orbitZoomBuffer = 0;
           return true;
         }
       } else {
-        this.state.orbitZoomBuffer = Math.max(0, this.state.orbitZoomBuffer - 0.2);
+        this.state.orbitZoomBuffer = Math.max(
+          0,
+          this.state.orbitZoomBuffer - this.config.zoom.bufferDecrement
+        );
       }
     }
     return false;
@@ -102,37 +139,57 @@ export class OrbitController {
     this.updateShipPosition(ship, delta);
     const orbit = this.state.orbitMotion;
     const radiusT = THREE.MathUtils.clamp(
-      (orbit.radius - ORBIT_RADIUS_MIN) /
-        Math.max(ORBIT_RADIUS_MAX - ORBIT_RADIUS_MIN, 1),
+      (orbit.radius - this.config.radius.min) /
+        Math.max(this.config.radius.max - this.config.radius.min, 1),
       0,
       1
     );
-    const offsetY = THREE.MathUtils.lerp(6, 14, radiusT);
-    const offsetZ = THREE.MathUtils.lerp(10, 26, radiusT);
+    const offsetY = THREE.MathUtils.lerp(
+      this.config.camera.offsetY.min,
+      this.config.camera.offsetY.max,
+      radiusT
+    );
+    const offsetZ = THREE.MathUtils.lerp(
+      this.config.camera.offsetZ.min,
+      this.config.camera.offsetZ.max,
+      radiusT
+    );
     cameraOffset.set(0, offsetY, offsetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
-    const followAlpha = THREE.MathUtils.clamp(delta * 5, 0.05, 0.2);
+    const followAlpha = THREE.MathUtils.clamp(
+      delta * this.config.camera.follow.rate,
+      this.config.camera.follow.min,
+      this.config.camera.follow.max
+    );
     camera.position.lerp(cameraTarget, followAlpha);
     camera.lookAt(ship.position);
   }
 
   updateShipPosition(ship, delta = 0) {
     const orbit = this.state.orbitMotion;
-    orbit.radius = THREE.MathUtils.clamp(orbit.radius, ORBIT_RADIUS_MIN, ORBIT_RADIUS_MAX);
+    orbit.radius = THREE.MathUtils.clamp(
+      orbit.radius,
+      this.config.radius.min,
+      this.config.radius.max
+    );
     if (this.state.pressedKeys.has('KeyW')) {
-      orbit.theta -= delta * 0.6;
+      orbit.theta -= delta * this.config.controls.thetaSpeed;
     }
     if (this.state.pressedKeys.has('KeyS')) {
-      orbit.theta += delta * 0.6;
+      orbit.theta += delta * this.config.controls.thetaSpeed;
     }
     if (this.state.pressedKeys.has('KeyA')) {
-      orbit.phi -= delta * 0.7;
+      orbit.phi -= delta * this.config.controls.phiSpeed;
     }
     if (this.state.pressedKeys.has('KeyD')) {
-      orbit.phi += delta * 0.7;
+      orbit.phi += delta * this.config.controls.phiSpeed;
     }
 
-    orbit.theta = THREE.MathUtils.clamp(orbit.theta, 0.2, Math.PI - 0.2);
+    orbit.theta = THREE.MathUtils.clamp(
+      orbit.theta,
+      this.config.controls.thetaClamp,
+      Math.PI - this.config.controls.thetaClamp
+    );
     orbit.phi = (orbit.phi + Math.PI * 2) % (Math.PI * 2);
 
     orbitTarget.setFromSphericalCoords(orbit.radius, orbit.theta, orbit.phi);

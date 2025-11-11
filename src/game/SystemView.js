@@ -1,10 +1,9 @@
 import * as THREE from 'three';
-import {
-  PLANETS_PER_SYSTEM,
-  SYSTEM_SPEED,
-  SYSTEM_ZOOM_STEP
-} from './constants.js';
+import { getConfig } from '../config/store.js';
 import { createFollowTarget, createPointTarget } from './targets.js';
+
+const systemConfig = getConfig('system');
+const shipConfig = getConfig('ship');
 
 const cameraOffset = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
@@ -13,6 +12,7 @@ export class SystemView {
   constructor(scene, state) {
     this.scene = scene;
     this.state = state;
+    this.config = systemConfig;
     this.wrapper = null;
   }
 
@@ -24,8 +24,10 @@ export class SystemView {
 
   moveShipToPlanet(ship, planetData) {
     this.state.currentPlanet = planetData;
-    ship.setTarget(createFollowTarget(planetData.mesh, planetData.radius + 3));
-    ship.setSpeed(SYSTEM_SPEED);
+    ship.setTarget(
+      createFollowTarget(planetData.mesh, planetData.radius + this.config.ship.approachOffset)
+    );
+    ship.setSpeed(shipConfig.speeds.system);
     this.state.resetZoom('system');
   }
 
@@ -33,7 +35,7 @@ export class SystemView {
     if (direction > 0 && this.state.currentPlanet) {
       this.state.zoomProgress.system = Math.min(
         1,
-        this.state.zoomProgress.system + SYSTEM_ZOOM_STEP
+        this.state.zoomProgress.system + this.config.zoom.step
       );
       if (this.state.zoomProgress.system >= 1) {
         this.state.zoomProgress.system = 0;
@@ -42,7 +44,7 @@ export class SystemView {
     } else if (direction < 0) {
       this.state.zoomProgress.system = Math.max(
         -1,
-        this.state.zoomProgress.system - SYSTEM_ZOOM_STEP
+        this.state.zoomProgress.system - this.config.zoom.step
       );
       if (this.state.zoomProgress.system <= -1) {
         this.state.zoomProgress.system = 0;
@@ -55,12 +57,18 @@ export class SystemView {
   buildSystem(starData) {
     const group = new THREE.Group();
     const starCore = new THREE.Mesh(
-      new THREE.SphereGeometry(4, 32, 32),
+      new THREE.SphereGeometry(
+        this.config.starCore.radius,
+        this.config.starCore.widthSegments,
+        this.config.starCore.heightSegments
+      ),
       new THREE.MeshStandardMaterial({
         color: starData.color,
-        emissive: starData.color.clone().multiplyScalar(1.6),
-        emissiveIntensity: 2.5,
-        roughness: 0.1
+        emissive: starData.color
+          .clone()
+          .multiplyScalar(this.config.starCore.material.emissiveMultiplier),
+        emissiveIntensity: this.config.starCore.material.emissiveIntensity,
+        roughness: this.config.starCore.material.roughness
       })
     );
     starCore.castShadow = true;
@@ -68,38 +76,55 @@ export class SystemView {
     group.add(starCore);
 
     const planets = [];
-    let orbitRadius = 12;
-    for (let i = 0; i < PLANETS_PER_SYSTEM; i += 1) {
-      const radius = THREE.MathUtils.randFloat(1.5, 3.8);
-      const hue = (starData.systemSeed + i * 0.13) % 1;
-      const color = new THREE.Color().setHSL(hue, 0.6, 0.5);
-      const planet = new THREE.Mesh(
-        new THREE.SphereGeometry(radius, 32, 32),
-        new THREE.MeshStandardMaterial({
-          color,
-          roughness: 0.7,
-          metalness: 0.1
-        })
+    let orbitRadius = this.config.planet.orbit.startRadius;
+    for (let i = 0; i < this.config.planetsPerSystem; i += 1) {
+      const radius = THREE.MathUtils.randFloat(
+        this.config.planet.radiusRange.min,
+        this.config.planet.radiusRange.max
       );
+      const hue = (starData.systemSeed + i * this.config.planet.color.hueStep) % 1;
+      const color = new THREE.Color().setHSL(
+        hue,
+        this.config.planet.color.saturation,
+        this.config.planet.color.lightness
+      );
+      const planetGeometry = new THREE.SphereGeometry(
+        radius,
+        this.config.planet.geometrySegments,
+        this.config.planet.geometrySegments
+      );
+      const planetMaterial = new THREE.MeshStandardMaterial({
+        color,
+        roughness: this.config.planet.material.roughness,
+        metalness: this.config.planet.material.metalness
+      });
+      const planet = new THREE.Mesh(planetGeometry, planetMaterial);
       const orbitAngle = Math.random() * Math.PI * 2;
       planet.position.set(
         Math.cos(orbitAngle) * orbitRadius,
-        THREE.MathUtils.randFloat(-1.5, 1.5),
+        THREE.MathUtils.randFloat(-this.config.planet.heightRange, this.config.planet.heightRange),
         Math.sin(orbitAngle) * orbitRadius
       );
       planet.castShadow = true;
       planet.receiveShadow = true;
       planet.userData = {
-        name: `Планета ${i + 1}`,
+        name: `${this.config.planet.naming.prefix}${i + 1}`,
         radius,
         mesh: planet
       };
       group.add(planet);
       planets.push({ ...planet.userData, mesh: planet });
-      orbitRadius += THREE.MathUtils.randFloat(6, 11);
+      orbitRadius += THREE.MathUtils.randFloat(
+        this.config.planet.orbit.incrementRange.min,
+        this.config.planet.orbit.incrementRange.max
+      );
     }
 
-    const asteroidBelt = this.createAsteroidBelt(24, 42, 1600);
+    const asteroidBelt = this.createAsteroidBelt(
+      this.config.asteroidBelt.innerRadius,
+      this.config.asteroidBelt.outerRadius,
+      this.config.asteroidBelt.count
+    );
     group.add(asteroidBelt);
 
     this.wrapper = { group, star: starCore, planets };
@@ -108,25 +133,33 @@ export class SystemView {
   }
 
   createAsteroidBelt(inner, outer, count) {
-    const geometry = new THREE.IcosahedronGeometry(0.35, 0);
+    const geometry = new THREE.IcosahedronGeometry(
+      this.config.asteroidBelt.geometryRadius,
+      this.config.asteroidBelt.geometryDetail
+    );
     const material = new THREE.MeshStandardMaterial({
-      color: 0x666666,
-      roughness: 1,
-      metalness: 0
+      color: new THREE.Color(this.config.asteroidBelt.materialColor),
+      roughness: this.config.asteroidBelt.roughness,
+      metalness: this.config.asteroidBelt.metalness
     });
     const belt = new THREE.InstancedMesh(geometry, material, count);
     const dummy = new THREE.Object3D();
     for (let i = 0; i < count; i += 1) {
       const radius = THREE.MathUtils.randFloat(inner, outer);
       const angle = Math.random() * Math.PI * 2;
-      const height = THREE.MathUtils.randFloatSpread(2.8);
+      const height = THREE.MathUtils.randFloatSpread(this.config.asteroidBelt.heightSpread);
       dummy.position.set(Math.cos(angle) * radius, height, Math.sin(angle) * radius);
       dummy.rotation.set(
         Math.random() * Math.PI,
         Math.random() * Math.PI,
         Math.random() * Math.PI
       );
-      dummy.scale.setScalar(THREE.MathUtils.randFloat(0.4, 1.2));
+      dummy.scale.setScalar(
+        THREE.MathUtils.randFloat(
+          this.config.asteroidBelt.scaleRange.min,
+          this.config.asteroidBelt.scaleRange.max
+        )
+      );
       dummy.updateMatrix();
       belt.setMatrixAt(i, dummy.matrix);
     }
@@ -139,10 +172,20 @@ export class SystemView {
     }
     const system = this.buildSystem(starData);
     this.scene.add(system.group);
-    ship.position.set(0, 0, 35);
-    ship.setTarget(createPointTarget(new THREE.Vector3(0, 0, 25)));
-    ship.setSpeed(SYSTEM_SPEED);
-    camera.position.set(0, 28, 82);
+    ship.position.set(
+      this.config.ship.entryShipPosition.x,
+      this.config.ship.entryShipPosition.y,
+      this.config.ship.entryShipPosition.z
+    );
+    ship.setTarget(
+      createPointTarget(new THREE.Vector3(0, 0, this.config.ship.entryTargetZ))
+    );
+    ship.setSpeed(shipConfig.speeds.system);
+    camera.position.set(
+      this.config.camera.entryPosition.x,
+      this.config.camera.entryPosition.y,
+      this.config.camera.entryPosition.z
+    );
     camera.lookAt(0, 0, 0);
     this.state.resetZoom();
     this.state.currentStar = starData;
@@ -160,28 +203,48 @@ export class SystemView {
 
   update(delta, ship, camera) {
     if (!this.wrapper) return;
-    this.wrapper.group.rotation.y += delta * 0.05;
+    this.wrapper.group.rotation.y += delta * this.config.rotationSpeed;
     const targetZoom = this.state.zoomProgress.system;
     this.state.zoomSmooth.system = THREE.MathUtils.damp(
       this.state.zoomSmooth.system,
       targetZoom,
-      6,
+      this.config.zoom.damping,
       delta
     );
     const zoom = this.state.zoomSmooth.system;
-    let offsetY = 18;
-    let offsetZ = 48;
+    let offsetY = this.config.camera.baseOffset.y;
+    let offsetZ = this.config.camera.baseOffset.z;
     if (zoom >= 0) {
-      offsetY = THREE.MathUtils.lerp(18, 12, zoom);
-      offsetZ = THREE.MathUtils.lerp(48, 32, zoom);
+      offsetY = THREE.MathUtils.lerp(
+        this.config.camera.baseOffset.y,
+        this.config.camera.zoomInOffset.y,
+        zoom
+      );
+      offsetZ = THREE.MathUtils.lerp(
+        this.config.camera.baseOffset.z,
+        this.config.camera.zoomInOffset.z,
+        zoom
+      );
     } else {
       const amount = -zoom;
-      offsetY = THREE.MathUtils.lerp(18, 26, amount);
-      offsetZ = THREE.MathUtils.lerp(48, 72, amount);
+      offsetY = THREE.MathUtils.lerp(
+        this.config.camera.baseOffset.y,
+        this.config.camera.zoomOutOffset.y,
+        amount
+      );
+      offsetZ = THREE.MathUtils.lerp(
+        this.config.camera.baseOffset.z,
+        this.config.camera.zoomOutOffset.z,
+        amount
+      );
     }
     cameraOffset.set(0, offsetY, offsetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
-    const followAlpha = THREE.MathUtils.clamp(delta * 4.5, 0.05, 0.16);
+    const followAlpha = THREE.MathUtils.clamp(
+      delta * this.config.camera.follow.rate,
+      this.config.camera.follow.min,
+      this.config.camera.follow.max
+    );
     camera.position.lerp(cameraTarget, followAlpha);
     camera.lookAt(ship.position);
   }

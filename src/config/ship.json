@@ -1,0 +1,39 @@
+{
+  "speeds": {
+    "galaxy": 12,
+    "system": 9
+  },
+  "movement": {
+    "follow": {
+      "rate": 8,
+      "min": 0.08,
+      "max": 0.55
+    },
+    "arrivalThreshold": 0.05
+  },
+  "geometry": {
+    "radius": 0.7,
+    "height": 2.2,
+    "radialSegments": 12
+  },
+  "material": {
+    "color": "#ffdd55",
+    "roughness": 0.3,
+    "metalness": 0.4,
+    "emissive": "#332200",
+    "emissiveIntensity": 0.6
+  },
+  "rotation": {
+    "x": 90
+  },
+  "trail": {
+    "radiusTop": 0.2,
+    "radiusBottom": 0,
+    "height": 1.6,
+    "radialSegments": 8,
+    "openEnded": true,
+    "color": "#77c6ff",
+    "opacity": 0.55,
+    "offsetZ": -0.8
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "starCount": 2000,
+  "radius": 600,
+  "color": {
+    "hueBase": 0.55,
+    "hueVariance": 0.08,
+    "saturation": 0.55,
+    "lightnessBase": 0.26,
+    "lightnessVariance": 0.12
+  },
+  "material": {
+    "size": 0.9,
+    "opacity": 0.38
+  }
+}

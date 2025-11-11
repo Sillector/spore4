@@ -1,0 +1,93 @@
+{
+  "planetsPerSystem": 6,
+  "rotationSpeed": 0.05,
+  "zoom": {
+    "step": 0.25,
+    "damping": 6
+  },
+  "ship": {
+    "approachOffset": 3,
+    "entryTargetZ": 25,
+    "entryShipPosition": {
+      "x": 0,
+      "y": 0,
+      "z": 35
+    }
+  },
+  "camera": {
+    "entryPosition": {
+      "x": 0,
+      "y": 28,
+      "z": 82
+    },
+    "baseOffset": {
+      "y": 18,
+      "z": 48
+    },
+    "zoomInOffset": {
+      "y": 12,
+      "z": 32
+    },
+    "zoomOutOffset": {
+      "y": 26,
+      "z": 72
+    },
+    "follow": {
+      "rate": 4.5,
+      "min": 0.05,
+      "max": 0.16
+    }
+  },
+  "starCore": {
+    "radius": 4,
+    "widthSegments": 32,
+    "heightSegments": 32,
+    "material": {
+      "emissiveMultiplier": 1.6,
+      "emissiveIntensity": 2.5,
+      "roughness": 0.1
+    }
+  },
+  "planet": {
+    "radiusRange": {
+      "min": 1.5,
+      "max": 3.8
+    },
+    "geometrySegments": 32,
+    "color": {
+      "hueStep": 0.13,
+      "saturation": 0.6,
+      "lightness": 0.5
+    },
+    "material": {
+      "roughness": 0.7,
+      "metalness": 0.1
+    },
+    "heightRange": 1.5,
+    "orbit": {
+      "startRadius": 12,
+      "incrementRange": {
+        "min": 6,
+        "max": 11
+      }
+    },
+    "naming": {
+      "prefix": "\u041f\u043b\u0430\u043d\u0435\u0442\u0430 "
+    }
+  },
+  "asteroidBelt": {
+    "innerRadius": 24,
+    "outerRadius": 42,
+    "count": 1600,
+    "geometryRadius": 0.35,
+    "geometryDetail": 0,
+    "materialColor": "#666666",
+    "roughness": 1,
+    "metalness": 0,
+    "heightSpread": 2.8,
+    "scaleRange": {
+      "min": 0.4,
+      "max": 1.2
+    }
+  }
+}

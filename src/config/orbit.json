@@ -1,0 +1,64 @@
+{
+  "radius": {
+    "min": 20,
+    "max": 40,
+    "base": 25,
+    "initial": 22
+  },
+  "zoom": {
+    "step": {
+      "min": 1.2,
+      "max": 3.6
+    },
+    "bufferIncrement": 0.25,
+    "bufferMagnitudeMultiplier": 0.35,
+    "bufferDecrement": 0.2,
+    "radiusExitThreshold": 0.5
+  },
+  "camera": {
+    "offsetY": {
+      "min": 6,
+      "max": 14
+    },
+    "offsetZ": {
+      "min": 10,
+      "max": 26
+    },
+    "follow": {
+      "rate": 5,
+      "min": 0.05,
+      "max": 0.2
+    },
+    "entryPosition": {
+      "x": 0,
+      "y": 0,
+      "z": 48
+    }
+  },
+  "controls": {
+    "thetaSpeed": 0.6,
+    "phiSpeed": 0.7,
+    "thetaClamp": 0.2
+  },
+  "initialAngles": {
+    "theta": 90,
+    "phi": 0
+  },
+  "surface": {
+    "radius": 18,
+    "widthSegments": 64,
+    "heightSegments": 64,
+    "material": {
+      "roughness": 1,
+      "metalness": 0.05
+    }
+  },
+  "atmosphere": {
+    "radius": 18.5,
+    "widthSegments": 48,
+    "heightSegments": 48,
+    "opacity": 0.25,
+    "saturationOffset": -0.1,
+    "lightnessOffset": 0.2
+  }
+}
