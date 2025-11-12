@@ -60,9 +60,6 @@ function renderEntries(container, value, path, meta) {
     if (childValue !== null && typeof childValue === 'object') {
       const group = document.createElement('div');
       group.className = 'dev-panel__group';
-      if (description) {
-        group.title = description;
-      }
 
       const groupLabel = document.createElement('div');
       groupLabel.className = 'dev-panel__group-label';
@@ -81,9 +78,6 @@ function renderEntries(container, value, path, meta) {
     } else {
       const field = document.createElement('label');
       field.className = 'dev-panel__field';
-      if (description) {
-        field.title = description;
-      }
 
       const label = document.createElement('span');
       label.className = 'dev-panel__field-label';
@@ -97,9 +91,6 @@ function renderEntries(container, value, path, meta) {
       input.dataset.configPath = nextPath.join('.');
       if (metaEntry.type) {
         input.dataset.configType = metaEntry.type;
-      }
-      if (description) {
-        input.title = description;
       }
       field.appendChild(input);
 
@@ -153,7 +144,6 @@ function createSection(name) {
   collapseButton.type = 'button';
   collapseButton.className = 'dev-panel__collapse';
   collapseButton.setAttribute('aria-label', `Переключить ${name}`);
-  collapseButton.setAttribute('aria-expanded', 'true');
   collapseButton.textContent = '▾';
   heading.appendChild(collapseButton);
 
@@ -179,9 +169,18 @@ function createSection(name) {
   const status = createStatusElement();
   section.appendChild(status);
 
-  function toggleSection() {
-    const collapsed = section.classList.toggle('dev-panel__section--collapsed');
+  let collapsed = true;
+
+  function setCollapsed(next) {
+    collapsed = next;
+    section.classList.toggle('dev-panel__section--collapsed', collapsed);
     collapseButton.setAttribute('aria-expanded', String(!collapsed));
+  }
+
+  setCollapsed(true);
+
+  function toggleSection() {
+    setCollapsed(!collapsed);
   }
 
   collapseButton.addEventListener('click', (event) => {
@@ -262,6 +261,14 @@ export function setupConfigPanel() {
   toggleButton.addEventListener('click', () => {
     panel.classList.toggle('dev-panel--open');
   });
+
+  const stopWheelPropagation = (event) => {
+    event.stopPropagation();
+  };
+
+  panel.addEventListener('wheel', stopWheelPropagation, { passive: false });
+  panel.addEventListener('wheel', stopWheelPropagation);
+  panel.addEventListener('touchmove', stopWheelPropagation, { passive: false });
 
   document.body.appendChild(toggleButton);
   document.body.appendChild(panel);
