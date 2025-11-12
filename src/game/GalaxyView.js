@@ -105,7 +105,8 @@ export class GalaxyView {
       glowStrength: emissiveMultiplier,
       timeOffset: randomGenerator.float(0, Math.PI * 2),
       pulseScale: THREE.MathUtils.lerp(0.7, 1.4, randomGenerator.next()),
-      noiseScale: THREE.MathUtils.lerp(0.6, 1.3, randomGenerator.next())
+      noiseScale: THREE.MathUtils.lerp(0.6, 1.3, randomGenerator.next()),
+      causticStrength: THREE.MathUtils.lerp(0.6, 1.2, randomGenerator.next())
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = false;

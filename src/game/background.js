@@ -24,7 +24,7 @@ function toRgba(color, alpha = 1) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function createSkyboxFace(direction) {
+function createSkySphereTexture() {
   const skyboxConfig = backgroundConfig.skybox ?? {};
   const size = skyboxConfig.size ?? defaultSkybox.size;
   const topColor = resolveColor(skyboxConfig.topColor, defaultSkybox.topColor);
@@ -35,75 +35,81 @@ function createSkyboxFace(direction) {
   const twinkleIntensity = skyboxConfig.starTwinkle ?? defaultSkybox.starTwinkle;
 
   const canvas = document.createElement('canvas');
-  canvas.width = size;
+  canvas.width = size * 2;
   canvas.height = size;
   const context = canvas.getContext('2d');
 
-  const verticalGradient = context.createLinearGradient(0, 0, 0, size);
+  const verticalGradient = context.createLinearGradient(0, 0, 0, canvas.height);
   verticalGradient.addColorStop(0, toRgba(topColor));
-  verticalGradient.addColorStop(0.55, toRgba(horizonColor));
+  verticalGradient.addColorStop(0.45, toRgba(horizonColor));
   verticalGradient.addColorStop(1, toRgba(bottomColor));
   context.fillStyle = verticalGradient;
-  context.fillRect(0, 0, size, size);
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
-  const centerX = size * 0.5;
-  const centerY = size * 0.5;
-  const radial = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, size * 0.72);
-  const glowInner = glowColor.clone().lerp(new THREE.Color(0xffffff), 0.55);
-  radial.addColorStop(0, toRgba(glowInner, 0.85));
-  radial.addColorStop(0.45, toRgba(glowColor.clone().lerp(new THREE.Color(0xffffff), 0.25), 0.35));
-  radial.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  const horizonBand = context.createLinearGradient(0, canvas.height * 0.45, 0, canvas.height * 0.65);
+  horizonBand.addColorStop(0, toRgba(horizonColor.clone().lerp(new THREE.Color('#ffffff'), 0.25), 0.35));
+  horizonBand.addColorStop(0.5, toRgba(glowColor.clone().lerp(new THREE.Color('#ffffff'), 0.4), 0.25));
+  horizonBand.addColorStop(1, toRgba(horizonColor, 0.2));
   context.globalCompositeOperation = 'lighter';
-  context.fillStyle = radial;
-  context.fillRect(0, 0, size, size);
+  context.fillStyle = horizonBand;
+  context.fillRect(0, canvas.height * 0.3, canvas.width, canvas.height * 0.6);
 
-  const rotationMap = {
-    px: 0.3,
-    nx: -0.3,
-    py: 0.6,
-    ny: -0.6,
-    pz: 0.15,
-    nz: -0.15
-  };
-  const rotation = rotationMap[direction] ?? 0;
+  const glowGradient = context.createRadialGradient(
+    canvas.width * 0.5,
+    canvas.height * 0.5,
+    canvas.height * 0.05,
+    canvas.width * 0.5,
+    canvas.height * 0.5,
+    canvas.width * 0.75
+  );
+  glowGradient.addColorStop(0, toRgba(glowColor.clone().lerp(new THREE.Color('#ffffff'), 0.2), 0.25));
+  glowGradient.addColorStop(0.25, toRgba(glowColor, 0.18));
+  glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  context.fillStyle = glowGradient;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  const auroraGradient = context.createLinearGradient(0, 0, canvas.width, 0);
+  auroraGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  auroraGradient.addColorStop(0.2, toRgba(glowColor.clone().lerp(new THREE.Color('#ffffff'), 0.15), 0.1));
+  auroraGradient.addColorStop(0.5, toRgba(glowColor.clone().lerp(new THREE.Color('#ffffff'), 0.3), 0.18));
+  auroraGradient.addColorStop(0.8, toRgba(glowColor.clone().lerp(new THREE.Color('#ffffff'), 0.15), 0.1));
+  auroraGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
   context.save();
-  context.translate(centerX, centerY);
-  context.rotate(rotation);
-  const streak = context.createLinearGradient(-size, 0, size, 0);
-  const streakColor = glowColor.clone().lerp(new THREE.Color(0xffffff), 0.4);
-  streak.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  streak.addColorStop(0.5, toRgba(streakColor, 0.28));
-  streak.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  context.fillStyle = streak;
-  context.fillRect(-size, -size, size * 2, size * 2);
+  context.translate(canvas.width * 0.5, canvas.height * 0.5);
+  context.rotate(0.15);
+  context.fillStyle = auroraGradient;
+  context.fillRect(-canvas.width, -canvas.height * 0.4, canvas.width * 2, canvas.height * 0.8);
   context.restore();
 
-  const random = createWorldRandom('skybox-face', direction);
-  const faceStarCount = Math.max(30, Math.floor((backgroundConfig.starCount ?? 1200) / 6));
+  const random = createWorldRandom('sky-sphere');
+  const totalStars = Math.max(180, backgroundConfig.starCount ?? 1200);
   const starHighlight = starColor.clone().lerp(new THREE.Color(0xffffff), 0.45);
-  context.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < faceStarCount; i += 1) {
-    const x = random.float(0, size);
-    const y = random.float(0, size);
+  for (let i = 0; i < totalStars; i += 1) {
+    const u = random.next();
+    const v = random.next();
+    const theta = u * Math.PI * 2;
+    const phi = Math.acos(2 * v - 1);
+    const x = (theta / (Math.PI * 2)) * canvas.width;
+    const y = (phi / Math.PI) * canvas.height;
     const baseRadius = random.float(0.35, 1.4);
-    const radius = baseRadius * (size / 720);
+    const radius = baseRadius * (canvas.height / 720);
     const twinkle = 0.35 + random.float(0, twinkleIntensity);
-    context.fillStyle = toRgba(starColor, 0.25 + twinkle * 0.55);
+    context.fillStyle = toRgba(starColor, 0.2 + twinkle * 0.5);
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI * 2);
     context.fill();
 
-    if (random.next() > 0.7) {
-      const alpha = 0.1 + twinkle * 0.2;
+    if (random.next() > 0.72) {
+      const alpha = 0.08 + twinkle * 0.22;
       context.strokeStyle = toRgba(starHighlight, alpha);
-      context.lineWidth = Math.max(0.5, radius * 0.6);
+      context.lineWidth = Math.max(0.45, radius * 0.55);
       context.beginPath();
-      context.moveTo(x - radius * 3.2, y);
-      context.lineTo(x + radius * 3.2, y);
+      context.moveTo(x - radius * 2.8, y);
+      context.lineTo(x + radius * 2.8, y);
       context.stroke();
       context.beginPath();
-      context.moveTo(x, y - radius * 3.2);
-      context.lineTo(x, y + radius * 3.2);
+      context.moveTo(x, y - radius * 2.8);
+      context.lineTo(x, y + radius * 2.8);
       context.stroke();
     }
   }
@@ -113,14 +119,15 @@ function createSkyboxFace(direction) {
 }
 
 export function createBackgroundSkybox(scene) {
-  const faces = ['px', 'nx', 'py', 'ny', 'pz', 'nz'];
-  const canvases = faces.map((face) => createSkyboxFace(face));
-  const cubeTexture = new THREE.CubeTexture(canvases);
-  cubeTexture.needsUpdate = true;
-  cubeTexture.colorSpace = THREE.SRGBColorSpace;
-  cubeTexture.generateMipmaps = true;
-  cubeTexture.minFilter = THREE.LinearMipMapLinearFilter;
-  cubeTexture.magFilter = THREE.LinearFilter;
-  scene.background = cubeTexture;
-  scene.environment = cubeTexture;
+  const canvas = createSkySphereTexture();
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.needsUpdate = true;
+  scene.background = texture;
+  scene.environment = null;
 }

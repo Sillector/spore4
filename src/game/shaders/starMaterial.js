@@ -22,6 +22,7 @@ uniform float pulseScale;
 uniform float noiseScale;
 uniform float glowStrength;
 uniform float highlight;
+uniform float causticStrength;
 varying vec2 vUv;
 varying vec3 vWorldPosition;
 varying vec3 vNormal;
@@ -63,6 +64,26 @@ float fbm(vec3 p) {
   return value;
 }
 
+mat2 rotate2d(float angle) {
+  float s = sin(angle);
+  float c = cos(angle);
+  return mat2(c, -s, s, c);
+}
+
+float causticPattern(vec2 uv, float t) {
+  vec2 p = uv * 3.5;
+  p += vec2(t * 0.12, t * 0.08);
+  vec2 q = p;
+  q *= rotate2d(0.5);
+  float waveA = sin(q.x * 5.0 + q.y * 3.0);
+  float waveB = sin(p.x * 7.0 - p.y * 4.0);
+  float waveC = sin((p.x + p.y) * 6.0 + t * 1.5);
+  float combined = waveA + waveB * 0.75 + waveC * 0.6;
+  combined = abs(combined);
+  combined = pow(combined, 1.4);
+  return clamp(combined, 0.0, 1.0);
+}
+
 void main() {
   vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
   float fresnel = pow(1.0 - max(dot(viewDirection, normalize(vNormal)), 0.0), 3.2);
@@ -74,11 +95,13 @@ void main() {
   float core = smoothstep(0.6, 0.05, distanceFromCenter);
   float aura = smoothstep(1.25, 0.25, distanceFromCenter + fresnel * 0.6 - pulse * 0.1);
   float highlightBoost = mix(1.0, 1.6, highlight);
+  float caustics = causticPattern(vUv - vec2(0.5), time) * causticStrength;
+  float causticGlow = caustics * (0.35 + pulse * 0.3);
   float energy = core * (1.1 + pulse * 0.6) + shockwave * (0.6 + pulse * 0.4);
-  vec3 color = baseColor * energy * highlightBoost;
-  color += glowColor * (aura * glowStrength * (0.8 + pulse * 0.5));
-  color += glowColor * fresnel * (0.5 + pulse * 0.5) * glowStrength * highlightBoost;
-  float alpha = clamp(core + aura * 0.8 + fresnel * 0.65, 0.0, 1.0);
+  vec3 color = baseColor * (energy + causticGlow * 0.8) * highlightBoost;
+  color += glowColor * (aura * glowStrength * (0.8 + pulse * 0.5 + causticGlow * 0.4));
+  color += glowColor * fresnel * (0.5 + pulse * 0.5 + causticGlow * 0.5) * glowStrength * highlightBoost;
+  float alpha = clamp(core + aura * 0.8 + fresnel * 0.65 + causticGlow * 0.4, 0.0, 1.0);
   if (alpha <= 0.01) {
     discard;
   }
@@ -91,7 +114,8 @@ export function createStarMaterial({
   glowStrength = 1,
   timeOffset = 0,
   pulseScale = 1,
-  noiseScale = 1
+  noiseScale = 1,
+  causticStrength = 1
 }) {
   const baseColor = color.clone();
   const glowColor = color.clone().lerp(new THREE.Color(0xffffff), 0.35);
@@ -103,7 +127,8 @@ export function createStarMaterial({
       pulseScale: { value: pulseScale },
       noiseScale: { value: noiseScale },
       glowStrength: { value: glowStrength },
-      highlight: { value: 0 }
+      highlight: { value: 0 },
+      causticStrength: { value: causticStrength }
     },
     vertexShader,
     fragmentShader,
