@@ -1,4 +1,9 @@
-import { getConfigNames, getConfigSnapshot, updateConfig } from '../config/store.js';
+import {
+  getConfigMetaSnapshot,
+  getConfigNames,
+  getConfigSnapshot,
+  updateConfig
+} from '../config/store.js';
 
 function createStatusElement() {
   const status = document.createElement('div');
@@ -38,40 +43,64 @@ function createFieldInput(value) {
   return input;
 }
 
-function renderEntries(container, value, path) {
+function getMetaEntry(meta, path) {
+  return meta[path.join('.')] || {};
+}
+
+function renderEntries(container, value, path, meta) {
   const entries = Array.isArray(value)
     ? value.map((item, index) => [index, item])
     : Object.entries(value);
 
   for (const [key, childValue] of entries) {
     const nextPath = path.concat(String(key));
+    const metaEntry = getMetaEntry(meta, nextPath);
+    const description = metaEntry.description || '';
 
     if (childValue !== null && typeof childValue === 'object') {
       const group = document.createElement('div');
       group.className = 'dev-panel__group';
+      if (description) {
+        group.title = description;
+      }
 
       const groupLabel = document.createElement('div');
       groupLabel.className = 'dev-panel__group-label';
       groupLabel.textContent = key;
+      if (description) {
+        groupLabel.title = description;
+      }
       group.appendChild(groupLabel);
 
       const groupContent = document.createElement('div');
       groupContent.className = 'dev-panel__group-content';
-      renderEntries(groupContent, childValue, nextPath);
+      renderEntries(groupContent, childValue, nextPath, meta);
       group.appendChild(groupContent);
 
       container.appendChild(group);
     } else {
       const field = document.createElement('label');
       field.className = 'dev-panel__field';
+      if (description) {
+        field.title = description;
+      }
 
       const label = document.createElement('span');
       label.className = 'dev-panel__field-label';
       label.textContent = key;
+      if (description) {
+        label.title = description;
+      }
       field.appendChild(label);
 
       const input = createFieldInput(childValue);
       input.dataset.configPath = nextPath.join('.');
+      if (metaEntry.type) {
+        input.dataset.configType = metaEntry.type;
+      }
+      if (description) {
+        input.title = description;
+      }
       field.appendChild(input);
 
       container.appendChild(field);
@@ -109,6 +138,7 @@ function assignValue(target, path, value) {
 
 function createSection(name) {
   let data = getConfigSnapshot(name);
+  const meta = getConfigMetaSnapshot(name);
 
   const section = document.createElement('section');
   section.className = 'dev-panel__section';
@@ -143,7 +173,7 @@ function createSection(name) {
 
   const body = document.createElement('div');
   body.className = 'dev-panel__section-body';
-  renderEntries(body, data, []);
+  renderEntries(body, data, [], meta);
   section.appendChild(body);
 
   const status = createStatusElement();
@@ -220,9 +250,13 @@ export function setupConfigPanel() {
   title.textContent = 'Настройки механик';
   panel.appendChild(title);
 
+  const content = document.createElement('div');
+  content.className = 'dev-panel__content';
+  panel.appendChild(content);
+
   const configs = getConfigNames();
   configs.forEach((name) => {
-    panel.appendChild(createSection(name));
+    content.appendChild(createSection(name));
   });
 
   toggleButton.addEventListener('click', () => {

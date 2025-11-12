@@ -1,9 +1,10 @@
-import galaxy from './galaxy.json';
-import system from './system.json';
-import ship from './ship.json';
-import orbit from './orbit.json';
-import background from './background.json';
-import scene from './scene.json';
+import galaxySource from './galaxy.xml?raw';
+import systemSource from './system.xml?raw';
+import shipSource from './ship.xml?raw';
+import orbitSource from './orbit.xml?raw';
+import backgroundSource from './background.xml?raw';
+import sceneSource from './scene.xml?raw';
+import { cloneMeta, parseConfigXml } from './xml.js';
 
 const clone = (value) => (
   typeof structuredClone === 'function'
@@ -11,11 +12,21 @@ const clone = (value) => (
     : JSON.parse(JSON.stringify(value))
 );
 
-const sources = { galaxy, system, ship, orbit, background, scene };
-const store = new Map();
+const sources = {
+  galaxy: parseConfigXml(galaxySource),
+  system: parseConfigXml(systemSource),
+  ship: parseConfigXml(shipSource),
+  orbit: parseConfigXml(orbitSource),
+  background: parseConfigXml(backgroundSource),
+  scene: parseConfigXml(sceneSource)
+};
 
-for (const [name, data] of Object.entries(sources)) {
+const store = new Map();
+const metaStore = new Map();
+
+for (const [name, { data, meta }] of Object.entries(sources)) {
   store.set(name, clone(data));
+  metaStore.set(name, cloneMeta(meta));
 }
 
 function mergeDeep(target, source) {
@@ -48,12 +59,24 @@ export function getConfig(name) {
   return config;
 }
 
+export function getConfigMeta(name) {
+  const meta = metaStore.get(name);
+  if (!meta) {
+    throw new Error(`Unknown config meta: ${name}`);
+  }
+  return meta;
+}
+
 export function getConfigNames() {
   return Array.from(store.keys());
 }
 
 export function getConfigSnapshot(name) {
   return clone(getConfig(name));
+}
+
+export function getConfigMetaSnapshot(name) {
+  return cloneMeta(getConfigMeta(name));
 }
 
 export function getAllConfigSnapshots() {

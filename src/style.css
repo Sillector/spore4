@@ -82,7 +82,9 @@ canvas {
   color: #e8f3ff;
   box-shadow: 0 1.5rem 3rem rgba(5, 20, 60, 0.35);
   backdrop-filter: blur(12px);
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   transform: translateY(-1rem);
   opacity: 0;
   pointer-events: none;
@@ -97,22 +99,30 @@ canvas {
 }
 
 .dev-panel__title {
-  margin: 0 0 0.75rem;
+  margin: 0;
   font-size: 1.05rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
+.dev-panel__content {
+  margin-top: 0.75rem;
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  gap: 0.75rem;
+  padding-right: 0.5rem;
+  overscroll-behavior: contain;
+}
+
 .dev-panel__section {
   border-top: 1px solid rgba(120, 180, 255, 0.2);
   padding-top: 0.75rem;
-  margin-top: 0.75rem;
 }
 
 .dev-panel__section:first-of-type {
   border-top: none;
   padding-top: 0;
-  margin-top: 0;
 }
 
 .dev-panel__section-header {

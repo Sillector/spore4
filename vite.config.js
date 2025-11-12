@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vite';
+import { parseConfigXml, serializeConfigXml } from './src/config/xml.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.resolve(__dirname, 'src/config');
@@ -28,7 +29,7 @@ function createConfigWriter() {
           res.end('Missing config name');
           return;
         }
-        const filePath = path.resolve(configDir, `${name}.json`);
+        const filePath = path.resolve(configDir, `${name}.xml`);
         try {
           await fs.access(filePath);
         } catch {
@@ -43,14 +44,16 @@ function createConfigWriter() {
         req.on('end', async () => {
           try {
             const data = JSON.parse(body || '{}');
-            const serialized = `${JSON.stringify(data, null, 2)}\n`;
+            const xmlSource = await fs.readFile(filePath, 'utf8');
+            const { meta } = parseConfigXml(xmlSource);
+            const serialized = serializeConfigXml(name, data, meta);
             await fs.writeFile(filePath, serialized, 'utf8');
             server.ws.send({ type: 'full-reload' });
             res.statusCode = 200;
             res.end('OK');
           } catch (error) {
             res.statusCode = 400;
-            res.end(`Invalid JSON: ${error.message}`);
+            res.end(`Invalid config payload: ${error.message}`);
           }
         });
       });
