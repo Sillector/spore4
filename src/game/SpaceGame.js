@@ -64,7 +64,7 @@ export class SpaceGame {
     this.resizeObserver.observe(this.container);
 
     this.setupLights();
-    createBackgroundNebula(this.scene);
+    this.background = createBackgroundNebula(this.scene);
 
     const restored = this.restorePlayerState();
     if (!restored) {
@@ -262,6 +262,7 @@ export class SpaceGame {
     } else if (this.state.level === 'transition') {
       this.camera.lookAt(this.ship.position);
     }
+    this.background?.update(this.clock.elapsedTime);
     this.renderer.render(this.scene, this.camera);
     this.playerStore?.syncFromState(this.state);
     requestAnimationFrame(this.animate);
@@ -299,6 +300,10 @@ export class SpaceGame {
     if (this.playerStore) {
       this.playerStore.dispose();
       this.playerStore = null;
+    }
+    if (this.background) {
+      this.background.dispose();
+      this.background = null;
     }
   }
 }
