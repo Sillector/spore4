@@ -6,8 +6,8 @@
     <aside
       class="dev-panel"
       :class="{ 'dev-panel--open': isOpen }"
-      @wheel.stop.prevent="stopScroll"
-      @touchmove.stop.prevent="stopScroll"
+      @wheel.stop
+      @touchmove.stop
     >
       <h2 class="dev-panel__title">Настройки механик</h2>
       <div class="dev-panel__content">
@@ -195,11 +195,6 @@ function togglePanel() {
 
 function toggleSection(section) {
   section.collapsed = !section.collapsed;
-}
-
-function stopScroll(event) {
-  event.stopPropagation();
-  event.preventDefault();
 }
 
 async function persistConfig(name, data) {
