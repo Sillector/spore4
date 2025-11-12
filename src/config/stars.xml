@@ -8,7 +8,7 @@
   <entry key="color" type="object" title="Цвета">
     <entry key="palette" type="array" description="Набор возможных цветов звёзд (hex)." title="Палитра">
       <item type="string">#bb9a58</item>
-      <item type="string">#bfbfbf</item>
+      <item type="string">#a1a1a1</item>
       <item type="string">#3973ac</item>
       <item type="string">#c46e6e</item>
     </entry>
