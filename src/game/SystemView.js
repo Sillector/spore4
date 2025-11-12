@@ -236,6 +236,8 @@ export class SystemView {
     if (this.wrapper) {
       this.scene.remove(this.wrapper.group);
     }
+    this.state.currentPlanet = null;
+    this.hoveredPlanet = null;
     const system = this.buildSystem(starData);
     this.scene.add(system.group);
     ship.position.set(
@@ -259,8 +261,6 @@ export class SystemView {
     camera.lookAt(0, 0, 0);
     this.state.resetZoom();
     this.state.currentStar = starData;
-    this.state.currentPlanet = null;
-    this.hoveredPlanet = null;
     this.state.level = 'system';
   }
 
