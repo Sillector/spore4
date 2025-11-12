@@ -8,10 +8,12 @@ import { createBackgroundNebula } from './background.js';
 import { createFollowTarget, createPointTarget } from './targets.js';
 import { getConfig } from '../config/store.js';
 import { MouseInputSystem } from './MouseInputSystem.js';
+import { PlayerStore } from './playerStore.js';
 
 const sceneConfig = getConfig('scene');
 const galaxyConfig = getConfig('galaxy');
 const shipConfig = getConfig('ship');
+const upDirection = new THREE.Vector3(0, 1, 0);
 
 export class SpaceGame {
   constructor(container) {
@@ -40,6 +42,7 @@ export class SpaceGame {
     );
 
     this.state = new GameState();
+    this.playerStore = new PlayerStore();
     this.pointer = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
     this.clock = new THREE.Clock();
@@ -63,10 +66,14 @@ export class SpaceGame {
     this.setupLights();
     createBackgroundNebula(this.scene);
 
-    this.initializeStartingStar();
+    const restored = this.restorePlayerState();
+    if (!restored) {
+      this.initializeStartingStar();
+    }
     this.mouseInput = null;
     this.bindEvents();
     this.animate = this.animate.bind(this);
+    this.playerStore.syncFromState(this.state);
     this.animate();
   }
 
@@ -97,6 +104,57 @@ export class SpaceGame {
     this.ship.snapToTarget();
     this.camera.position.copy(this.ship.position).add(this.cameraBaseOffset);
     this.camera.lookAt(this.ship.position);
+  }
+
+  restorePlayerState() {
+    if (!this.playerStore) {
+      return false;
+    }
+    const snapshot = this.playerStore.getSnapshot();
+    if (!snapshot || snapshot.currentStarId === null) {
+      return false;
+    }
+    const starData = this.state.galaxyStars.find((star) => star.id === snapshot.currentStarId);
+    if (!starData) {
+      return false;
+    }
+    this.galaxyView.moveShipToStar(this.ship, starData);
+    this.ship.snapToTarget();
+    this.camera.position.copy(this.ship.position).add(this.cameraBaseOffset);
+    this.camera.lookAt(this.ship.position);
+    this.state.level = 'galaxy';
+    this.state.resetZoom('galaxy');
+    if (snapshot.state === 'galaxy') {
+      this.galaxyView.setVisible(true);
+      this.systemView.setVisible(false);
+      return true;
+    }
+    this.galaxyView.setVisible(false);
+    this.hoveredStar = null;
+    this.galaxyView.setHoveredStar(null);
+    this.systemView.setHoveredPlanet(null);
+    this.systemView.enter(starData, this.ship, this.camera, { autoSelectFirstPlanet: false });
+    let planetData = null;
+    if (snapshot.currentPlanetId !== null && this.state.currentSystem) {
+      planetData = this.state.currentSystem.planets.find(
+        (planet) => planet.id === snapshot.currentPlanetId
+      );
+    }
+    if (!planetData && snapshot.state === 'system' && this.state.currentSystem) {
+      planetData = this.state.currentSystem.planets[0] ?? null;
+    }
+    if (planetData) {
+      this.systemView.moveShipToPlanet(this.ship, planetData);
+      this.ship.snapToTarget();
+    }
+    if (snapshot.state === 'planet' && planetData) {
+      this.enterOrbit(planetData);
+    } else {
+      this.systemView.setVisible(true);
+      this.state.level = 'system';
+      this.state.resetZoom('system');
+    }
+    return true;
   }
 
   bindEvents() {
@@ -145,7 +203,8 @@ export class SpaceGame {
     const target = this.state.currentStar
       ? createFollowTarget(
           this.state.currentStar.mesh,
-          galaxyConfig.ship.approachAltitude
+          galaxyConfig.ship.approachAltitude,
+          upDirection
         )
       : createPointTarget(new THREE.Vector3());
     this.ship.setTarget(target);
@@ -154,6 +213,7 @@ export class SpaceGame {
     this.camera.position.copy(this.ship.position).add(this.cameraBaseOffset);
     this.camera.lookAt(this.ship.position);
     this.state.level = 'galaxy';
+    this.state.currentPlanet = null;
     this.state.resetZoom();
     this.updateHoverSelection();
   }
@@ -203,6 +263,7 @@ export class SpaceGame {
       this.camera.lookAt(this.ship.position);
     }
     this.renderer.render(this.scene, this.camera);
+    this.playerStore?.syncFromState(this.state);
     requestAnimationFrame(this.animate);
   }
 
@@ -234,6 +295,10 @@ export class SpaceGame {
     }
     if (this.boundKeyUp) {
       window.removeEventListener('keyup', this.boundKeyUp);
+    }
+    if (this.playerStore) {
+      this.playerStore.dispose();
+      this.playerStore = null;
     }
   }
 }

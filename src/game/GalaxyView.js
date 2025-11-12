@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { getConfig } from '../config/store.js';
 import { createFollowTarget } from './targets.js';
+import { createSeedKey, createWorldRandom } from './random.js';
 
 const STAR_COLOR_PRESETS = [
   { hue: 0.02, saturation: 0.78, lightness: 0.56, emissiveMultiplier: 0.8 },
@@ -19,6 +20,7 @@ const shipConfig = getConfig('ship');
 const cameraOffset = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
 const starWorldPosition = new THREE.Vector3();
+const upDirection = new THREE.Vector3(0, 1, 0);
 
 export class GalaxyView {
   constructor(scene, state) {
@@ -40,36 +42,40 @@ export class GalaxyView {
     const temp = new THREE.Vector3();
     this.state.galaxyStars.length = 0;
     for (let i = 0; i < this.config.starCount; i += 1) {
-      const star = this.createStar();
-      const radius = Math.sqrt(Math.random()) * this.config.radius;
-      const theta = Math.random() * Math.PI * 2;
+      const starKey = createSeedKey('star', i);
+      const starRandom = createWorldRandom('galaxy', starKey);
+      const star = this.createStar(starRandom);
+      const radius = Math.sqrt(starRandom.next()) * this.config.radius;
+      const theta = starRandom.float(0, Math.PI * 2);
       const distanceFactor = 1 - radius / this.config.radius;
       const heightRange = THREE.MathUtils.lerp(
         this.config.heightRange.base,
         this.config.thickness * this.config.heightRange.thicknessFactor,
         distanceFactor
       );
-      const y = THREE.MathUtils.randFloatSpread(heightRange);
+      const y = starRandom.floatSpread(heightRange);
       temp.set(Math.cos(theta) * radius, y, Math.sin(theta) * radius);
       star.position.copy(temp);
       star.userData.position = temp.clone();
-      star.userData.systemSeed = Math.random();
+      star.userData.id = i;
+      star.userData.seedKey = starKey;
+      star.userData.systemSeed = i;
       this.group.add(star);
       this.state.galaxyStars.push(star.userData);
     }
   }
 
-  createStar() {
+  createStar(randomGenerator) {
     const palette = this.starPalette.length ? this.starPalette : STAR_COLOR_PRESETS;
-    const preset = palette[Math.floor(Math.random() * palette.length)];
+    const preset = randomGenerator.pick(palette) ?? palette[0];
     const hue = THREE.MathUtils.clamp(
-      preset.hue + THREE.MathUtils.randFloatSpread(preset.hueVariance ?? STAR_COLOR_VARIANCE.hue),
+      preset.hue + randomGenerator.floatSpread(preset.hueVariance ?? STAR_COLOR_VARIANCE.hue),
       0,
       1
     );
     const saturation = THREE.MathUtils.clamp(
       preset.saturation +
-        THREE.MathUtils.randFloatSpread(
+        randomGenerator.floatSpread(
           preset.saturationVariance ?? STAR_COLOR_VARIANCE.saturation
         ),
       0,
@@ -77,7 +83,9 @@ export class GalaxyView {
     );
     const lightness = THREE.MathUtils.clamp(
       preset.lightness +
-        THREE.MathUtils.randFloatSpread(preset.lightnessVariance ?? STAR_COLOR_VARIANCE.lightness),
+        randomGenerator.floatSpread(
+          preset.lightnessVariance ?? STAR_COLOR_VARIANCE.lightness
+        ),
       0,
       1
     );
@@ -101,10 +109,10 @@ export class GalaxyView {
     const mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+    const nameMin = this.config.star.name.min;
+    const nameMax = nameMin + this.config.star.name.maxRange - 1;
     mesh.userData = {
-      name: `${this.config.star.name.prefix}${Math.floor(
-        Math.random() * this.config.star.name.maxRange + this.config.star.name.min
-      )}`,
+      name: `${this.config.star.name.prefix}${randomGenerator.int(nameMin, nameMax)}`,
       color,
       mesh
     };
@@ -129,7 +137,9 @@ export class GalaxyView {
 
   moveShipToStar(ship, starData) {
     this.state.currentStar = starData;
-    ship.setTarget(createFollowTarget(starData.mesh, this.config.ship.approachAltitude));
+    ship.setTarget(
+      createFollowTarget(starData.mesh, this.config.ship.approachAltitude, upDirection)
+    );
     ship.setSpeed(shipConfig.speeds.galaxy);
   }
 

@@ -1,0 +1,8 @@
+<config name="world" title="Мир">
+  <entry
+    key="seed"
+    type="string"
+    title="Сид"
+    description="Базовый сид генерации галактики и планетарных систем."
+  >spore4-default-seed</entry>
+</config>
