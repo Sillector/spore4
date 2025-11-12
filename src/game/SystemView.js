@@ -7,6 +7,8 @@ const shipConfig = getConfig('ship');
 
 const cameraOffset = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
+const planetWorldPosition = new THREE.Vector3();
+const approachDirection = new THREE.Vector3();
 
 export class SystemView {
   constructor(scene, state) {
@@ -24,8 +26,21 @@ export class SystemView {
 
   moveShipToPlanet(ship, planetData) {
     this.state.currentPlanet = planetData;
+    planetData.mesh.getWorldPosition(planetWorldPosition);
+    approachDirection.copy(ship.position).sub(planetWorldPosition);
+    if (approachDirection.lengthSq() < 1e-6) {
+      approachDirection.copy(planetWorldPosition);
+      if (approachDirection.lengthSq() < 1e-6) {
+        approachDirection.set(0, 0, 1);
+      }
+    }
+    approachDirection.normalize();
     ship.setTarget(
-      createFollowTarget(planetData.mesh, planetData.radius + this.config.ship.approachOffset)
+      createFollowTarget(
+        planetData.mesh,
+        planetData.radius + this.config.ship.approachOffset,
+        approachDirection
+      )
     );
     ship.setSpeed(shipConfig.speeds.system);
     this.state.resetZoom('system');
@@ -177,10 +192,14 @@ export class SystemView {
       this.config.ship.entryShipPosition.y,
       this.config.ship.entryShipPosition.z
     );
-    ship.setTarget(
-      createPointTarget(new THREE.Vector3(0, 0, this.config.ship.entryTargetZ))
-    );
-    ship.setSpeed(shipConfig.speeds.system);
+    if (system.planets.length > 0) {
+      this.moveShipToPlanet(ship, system.planets[0]);
+    } else {
+      ship.setTarget(
+        createPointTarget(new THREE.Vector3(0, 0, this.config.ship.entryTargetZ))
+      );
+      ship.setSpeed(shipConfig.speeds.system);
+    }
     camera.position.set(
       this.config.camera.entryPosition.x,
       this.config.camera.entryPosition.y,

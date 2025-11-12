@@ -7,8 +7,13 @@ export function createPointTarget(position) {
   return { type: 'point', position: position.clone() };
 }
 
-export function createFollowTarget(mesh, altitude = 0) {
-  return { type: 'follow', mesh, altitude };
+export function createFollowTarget(mesh, altitude = 0, direction = null) {
+  return {
+    type: 'follow',
+    mesh,
+    altitude,
+    direction: direction ? direction.clone() : null
+  };
 }
 
 export function resolveTargetPosition(target) {
@@ -19,13 +24,21 @@ export function resolveTargetPosition(target) {
   }
   if (target.type === 'follow' && target.mesh) {
     target.mesh.getWorldPosition(tempTarget);
-    if (target.altitude !== 0) {
-      tempDirection.copy(tempTarget);
-      if (tempDirection.lengthSq() > 1e-6) {
-        tempDirection.normalize();
+    if (target.altitude !== 0 || target.direction) {
+      if (target.direction && target.direction.lengthSq() > 1e-6) {
+        tempDirection.copy(target.direction).normalize();
+      } else {
+        tempDirection.copy(tempTarget);
+        if (tempDirection.lengthSq() > 1e-6) {
+          tempDirection.normalize();
+        } else {
+          tempDirection.set(0, 0, 1);
+        }
+      }
+      if (target.altitude !== 0) {
         tempTarget.addScaledVector(tempDirection, target.altitude);
       } else {
-        tempTarget.z += target.altitude;
+        tempTarget.add(tempDirection);
       }
     }
     return tempTarget;

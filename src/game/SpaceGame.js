@@ -48,6 +48,10 @@ export class SpaceGame {
     this.systemView = new SystemView(this.scene, this.state);
     this.orbitController = new OrbitController(this.scene, this.state);
 
+    this.planetTooltip = document.createElement('div');
+    this.planetTooltip.className = 'planet-tooltip';
+    this.container.appendChild(this.planetTooltip);
+
     this.cameraBaseOffset = new THREE.Vector3(
       galaxyConfig.cameraBaseOffset.x,
       galaxyConfig.cameraBaseOffset.y,
@@ -61,6 +65,7 @@ export class SpaceGame {
     createBackgroundNebula(this.scene);
 
     this.initializeStartingStar();
+    this.hidePlanetTooltip();
     this.bindEvents();
     this.animate = this.animate.bind(this);
     this.animate();
@@ -98,12 +103,14 @@ export class SpaceGame {
   bindEvents() {
     this.boundPointerMove = this.onPointerMove.bind(this);
     this.boundPointerDown = this.onPointerDown.bind(this);
+    this.boundPointerLeave = this.onPointerLeave.bind(this);
     this.boundWheel = this.onWheel.bind(this);
     this.boundKeyDown = (event) => this.onKeyChange(event);
     this.boundKeyUp = (event) => this.onKeyChange(event);
 
     this.renderer.domElement.addEventListener('pointermove', this.boundPointerMove);
     this.renderer.domElement.addEventListener('pointerdown', this.boundPointerDown);
+    this.renderer.domElement.addEventListener('pointerleave', this.boundPointerLeave);
     window.addEventListener('wheel', this.boundWheel, { passive: false });
     window.addEventListener('keydown', this.boundKeyDown);
     window.addEventListener('keyup', this.boundKeyUp);
@@ -111,8 +118,11 @@ export class SpaceGame {
 
   onPointerMove(event) {
     const rect = this.renderer.domElement.getBoundingClientRect();
-    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    const localX = event.clientX - rect.left;
+    const localY = event.clientY - rect.top;
+    this.pointer.x = (localX / rect.width) * 2 - 1;
+    this.pointer.y = -(localY / rect.height) * 2 + 1;
+    this.updatePlanetTooltip(localX, localY);
   }
 
   onPointerDown(event) {
@@ -125,6 +135,10 @@ export class SpaceGame {
     } else if (this.state.level === 'system') {
       this.systemView.moveShipToPlanet(this.ship, first.userData);
     }
+  }
+
+  onPointerLeave() {
+    this.hidePlanetTooltip();
   }
 
   onWheel(event) {
@@ -177,6 +191,7 @@ export class SpaceGame {
   enterSystem(starData) {
     if (!starData) return;
     this.state.level = 'transition';
+    this.hidePlanetTooltip();
     this.galaxyView.setVisible(false);
     this.orbitController.exit(this.ship, null);
     this.systemView.enter(starData, this.ship, this.camera);
@@ -186,6 +201,7 @@ export class SpaceGame {
     this.systemView.exit();
     this.orbitController.exit(this.ship, null);
     this.galaxyView.setVisible(true);
+    this.hidePlanetTooltip();
     const target = this.state.currentStar
       ? createFollowTarget(
           this.state.currentStar.mesh,
@@ -203,6 +219,7 @@ export class SpaceGame {
 
   enterOrbit(planetData) {
     if (!planetData) return;
+    this.hidePlanetTooltip();
     this.systemView.setVisible(false);
     this.orbitController.enter(planetData, this.ship, this.camera);
   }
@@ -216,6 +233,36 @@ export class SpaceGame {
     this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+  }
+
+  hidePlanetTooltip() {
+    if (!this.planetTooltip) return;
+    this.planetTooltip.textContent = '';
+    this.planetTooltip.classList.remove('planet-tooltip--visible');
+    this.planetTooltip.style.transform = 'translate(-9999px, -9999px)';
+  }
+
+  updatePlanetTooltip(localX, localY) {
+    if (!this.planetTooltip) return;
+    if (this.state.level !== 'system') {
+      this.hidePlanetTooltip();
+      return;
+    }
+    const intersects = this.pickIntersectables();
+    if (!intersects.length) {
+      this.hidePlanetTooltip();
+      return;
+    }
+    const planet = intersects[0].object.userData;
+    if (!planet?.name) {
+      this.hidePlanetTooltip();
+      return;
+    }
+    this.planetTooltip.textContent = planet.name;
+    const tooltipX = Math.round(localX + 12);
+    const tooltipY = Math.round(localY + 12);
+    this.planetTooltip.style.transform = `translate(${tooltipX}px, ${tooltipY}px)`;
+    this.planetTooltip.classList.add('planet-tooltip--visible');
   }
 
   animate() {
@@ -239,11 +286,15 @@ export class SpaceGame {
     this.renderer.dispose();
     this.renderer.domElement.remove();
     this.ship.dispose();
+    this.planetTooltip?.remove();
     if (this.boundPointerMove) {
       this.renderer.domElement.removeEventListener('pointermove', this.boundPointerMove);
     }
     if (this.boundPointerDown) {
       this.renderer.domElement.removeEventListener('pointerdown', this.boundPointerDown);
+    }
+    if (this.boundPointerLeave) {
+      this.renderer.domElement.removeEventListener('pointerleave', this.boundPointerLeave);
     }
     if (this.boundWheel) {
       window.removeEventListener('wheel', this.boundWheel);
