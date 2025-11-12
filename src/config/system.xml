@@ -11,8 +11,9 @@
     <entry key="entryShipPosition" type="object" description="Позиция корабля при входе в систему." title="Позиция корабля">
       <entry key="x" type="number" description="Координата корабля по оси X при входе." title="Координата X">0</entry>
       <entry key="y" type="number" description="Координата корабля по оси Y при входе." title="Координата Y">0</entry>
-      <entry key="z" type="number" description="Координата корабля по оси Z при входе." title="Координата Z">35</entry>
+      <entry key="z" type="number" description="Координата корабля по оси Z при входе." title="Координата З">35</entry>
     </entry>
+    <entry key="avoidanceClearance" type="number" description="Безопасный зазор при обходе препятствий (звезда, планеты)." title="Зазор обхода">2</entry>
   </entry>
   <entry key="camera" type="object" description="Настройки камеры в системном режиме." title="Камера">
     <entry key="entryPosition" type="object" description="Начальная позиция камеры при входе в систему." title="Позиция входа">
@@ -36,16 +37,6 @@
       <entry key="rate" type="number" description="Скорость интерполяции камеры к целевой точке." title="Скорость следования">4.5</entry>
       <entry key="min" type="number" description="Минимальный коэффициент сглаживания движения камеры." title="Минимальное сглаживание">0.05</entry>
       <entry key="max" type="number" description="Максимальный коэффициент сглаживания движения камеры." title="Максимальное сглаживание">0.16</entry>
-    </entry>
-  </entry>
-  <entry key="starCore" type="object" description="Визуальные параметры центральной звезды." title="Центральная звезда">
-    <entry key="radius" type="number" description="Радиус центральной звезды." title="Радиус">4</entry>
-    <entry key="widthSegments" type="number" description="Количество сегментов по ширине для звезды." title="Сегменты по ширине">32</entry>
-    <entry key="heightSegments" type="number" description="Количество сегментов по высоте для звезды." title="Сегменты по высоте">32</entry>
-    <entry key="material" type="object" description="Настройки материала звезды." title="Материал">
-      <entry key="emissiveMultiplier" type="number" description="Множитель яркости эмиссионного свечения." title="Множитель свечения">1.6</entry>
-      <entry key="emissiveIntensity" type="number" description="Интенсивность эмиссионного свечения материала." title="Интенсивность свечения">2.5</entry>
-      <entry key="roughness" type="number" description="Шероховатость материала звезды." title="Шероховатость">0.1</entry>
     </entry>
   </entry>
   <entry key="planet" type="object" description="Параметры генерации планет." title="Планеты">
@@ -91,4 +82,3 @@
     </entry>
   </entry>
 </config>
-

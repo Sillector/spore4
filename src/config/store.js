@@ -5,6 +5,7 @@ import orbitSource from './orbit.xml?raw';
 import backgroundSource from './background.xml?raw';
 import sceneSource from './scene.xml?raw';
 import worldSource from './world.xml?raw';
+import starsSource from './stars.xml?raw';
 import { cloneMeta, parseConfigXml } from './xml.js';
 
 const clone = (value) => (
@@ -20,7 +21,8 @@ const sources = {
   orbit: parseConfigXml(orbitSource),
   background: parseConfigXml(backgroundSource),
   scene: parseConfigXml(sceneSource),
-  world: parseConfigXml(worldSource)
+  world: parseConfigXml(worldSource),
+  stars: parseConfigXml(starsSource)
 };
 
 const store = new Map();

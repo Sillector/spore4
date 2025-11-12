@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { getConfig } from '../config/store.js';
 import { createFollowTarget, createPathTarget, createPointTarget } from './targets.js';
 import { createWorldRandom } from './random.js';
+import { createStarMesh } from './starFactory.js';
+import { tickStarMaterial } from './starShader.js';
 
 const systemConfig = getConfig('system');
 const shipConfig = getConfig('ship');
@@ -108,24 +110,13 @@ export class SystemView {
     const group = new THREE.Group();
     const systemSeed = starData?.systemSeed ?? starData?.id ?? 0;
     const randomGenerator = createWorldRandom('system', systemSeed);
-    const starCore = new THREE.Mesh(
-      new THREE.SphereGeometry(
-        this.config.starCore.radius,
-        this.config.starCore.widthSegments,
-        this.config.starCore.heightSegments
-      ),
-      new THREE.MeshStandardMaterial({
-        color: starData.color,
-        emissive: starData.color
-          .clone()
-          .multiplyScalar(this.config.starCore.material.emissiveMultiplier),
-        emissiveIntensity: this.config.starCore.material.emissiveIntensity,
-        roughness: this.config.starCore.material.roughness
-      })
-    );
-    starCore.castShadow = true;
-    starCore.receiveShadow = true;
-    group.add(starCore);
+
+    // центральная звезда: единая точка входа через фабрику
+    const starMesh = createStarMesh('system', randomGenerator, {
+      baseColor: starData?.color
+    });
+    starMesh.position.set(0, 0, 0);
+    group.add(starMesh);
 
     const planets = [];
     let orbitRadius = this.config.planet.orbit.startRadius;
@@ -192,7 +183,7 @@ export class SystemView {
     );
     group.add(asteroidBelt);
 
-    this.wrapper = { group, star: starCore, planets };
+    this.wrapper = { group, star: starMesh, planets };
     this.state.currentSystem = this.wrapper;
     return this.wrapper;
   }
@@ -294,6 +285,10 @@ export class SystemView {
   update(delta, ship, camera) {
     if (!this.wrapper) return;
     this.wrapper.group.rotation.y += delta * this.config.rotationSpeed;
+    // анимация шейдера звезды системы
+    if (this.wrapper.star?.material?.userData?.isStarShader) {
+      tickStarMaterial(this.wrapper.star.material, delta);
+    }
     const targetZoom = this.state.zoomProgress.system;
     this.state.zoomSmooth.system = THREE.MathUtils.damp(
       this.state.zoomSmooth.system,
@@ -395,7 +390,8 @@ export class SystemView {
     if (!this.wrapper) return null;
     const clearance = this.config.ship.avoidanceClearance ?? 2;
     let requiredHeight = null;
-    const starRadius = this.config.starCore.radius;
+    // радиус центральной звезды из сгенерированного меша
+    const starRadius = this.wrapper.star?.userData?.radius ?? 4;
     if (this.wrapper.star) {
       this.wrapper.star.getWorldPosition(obstacleCenter);
       if (

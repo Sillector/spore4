@@ -1,5 +1,5 @@
 <config name="galaxy" title="Галактика">
-  <entry key="starCount" type="number" description="Количество звёзд, создаваемых при генерации галактики." title="Количество звёзд">70</entry>
+  <entry key="starCount" type="number" description="Количество звёзд, создаваемых при генерации галактики." title="Количество звёзд">250</entry>
   <entry key="radius" type="number" description="Радиус распределения звёзд относительно центра галактики." title="Радиус галактики">120</entry>
   <entry key="thickness" type="number" description="Толщина диска галактики вдоль оси Y." title="Толщина диска">14</entry>
   <entry key="rotationSpeed" type="number" description="Скорость вращения звёздного массива в радианах за кадр." title="Скорость вращения">0.01</entry>
@@ -39,56 +39,7 @@
     <entry key="y" type="number" description="Смещение камеры по оси Y." title="Смещение Y">52</entry>
     <entry key="z" type="number" description="Смещение камеры по оси Z." title="Смещение Z">165</entry>
   </entry>
-  <entry key="star" type="object" description="Параметры визуализации звёзд." title="Звёзды">
-    <entry key="geometry" type="object" description="Настройки геометрии звёзд." title="Геометрия">
-      <entry key="radius" type="number" description="Радиус сферической геометрии звезды." title="Радиус">1.4</entry>
-      <entry key="widthSegments" type="number" description="Количество сегментов по ширине сферы." title="Сегменты по ширине">24</entry>
-      <entry key="heightSegments" type="number" description="Количество сегментов по высоте сферы." title="Сегменты по высоте">24</entry>
-    </entry>
-    <entry key="color" type="object" description="Настройки генерации цвета звёзд." title="Цвет">
-      <entry key="palette" type="array" description="Доступные варианты оттенков звёзд." title="Палитра звёзд">
-        <item type="object" description="Красная звезда" title="Красная звезда">
-          <entry key="hue" type="number" description="Оттенок в модели HSL." title="Оттенок">0.02</entry>
-          <entry key="saturation" type="number" description="Насыщенность цвета." title="Насыщенность">0.78</entry>
-          <entry key="lightness" type="number" description="Яркость цвета." title="Яркость">0.56</entry>
-          <entry key="emissiveMultiplier" type="number" description="Усиление свечения." title="Сила свечения">0.8</entry>
-        </item>
-        <item type="object" description="Жёлтая звезда" title="Жёлтая звезда">
-          <entry key="hue" type="number" description="Оттенок в модели HSL." title="Оттенок">0.12</entry>
-          <entry key="saturation" type="number" description="Насыщенность цвета." title="Насыщенность">0.72</entry>
-          <entry key="lightness" type="number" description="Яркость цвета." title="Яркость">0.62</entry>
-          <entry key="emissiveMultiplier" type="number" description="Усиление свечения." title="Сила свечения">0.75</entry>
-        </item>
-        <item type="object" description="Белая звезда" title="Белая звезда">
-          <entry key="hue" type="number" description="Оттенок в модели HSL." title="Оттенок">0</entry>
-          <entry key="saturation" type="number" description="Насыщенность цвета." title="Насыщенность">0.04</entry>
-          <entry key="lightness" type="number" description="Яркость цвета." title="Яркость">0.92</entry>
-          <entry key="emissiveMultiplier" type="number" description="Усиление свечения." title="Сила свечения">0.7</entry>
-        </item>
-        <item type="object" description="Голубая звезда" title="Голубая звезда">
-          <entry key="hue" type="number" description="Оттенок в модели HSL." title="Оттенок">0.58</entry>
-          <entry key="saturation" type="number" description="Насыщенность цвета." title="Насыщенность">0.64</entry>
-          <entry key="lightness" type="number" description="Яркость цвета." title="Яркость">0.68</entry>
-          <entry key="emissiveMultiplier" type="number" description="Усиление свечения." title="Сила свечения">0.85</entry>
-        </item>
-      </entry>
-      <entry key="variance" type="object" description="Разброс параметров оттенков." title="Разброс параметров">
-        <entry key="hue" type="number" description="Допустимое отклонение оттенка." title="Отклонение оттенка">0.015</entry>
-        <entry key="saturation" type="number" description="Допустимое отклонение насыщенности." title="Отклонение насыщенности">0.06</entry>
-        <entry key="lightness" type="number" description="Допустимое отклонение яркости." title="Отклонение яркости">0.05</entry>
-      </entry>
-      <entry key="emissiveMultiplier" type="number" description="Значение по умолчанию для усиления свечения." title="Базовое свечение">0.7</entry>
-    </entry>
-    <entry key="material" type="object" description="Параметры материала для звёзд." title="Материал">
-      <entry key="emissiveIntensity" type="number" description="Интенсивность эмиссионного свечения материала." title="Интенсивность эмиссии">1.5</entry>
-      <entry key="roughness" type="number" description="Шероховатость материала звезды." title="Шероховатость">0.25</entry>
-      <entry key="metalness" type="number" description="Металличность материала звезды." title="Металличность">0.1</entry>
-    </entry>
-    <entry key="name" type="object" description="Настройки генерации названий звёздных систем." title="Названия систем">
-      <entry key="prefix" type="string" description="Префикс для имени звёздной системы." title="Префикс">Система </entry>
-      <entry key="min" type="number" description="Минимальное числовое значение для генерации названия." title="Минимальное значение">100</entry>
-      <entry key="maxRange" type="number" description="Диапазон увеличения числовой части имени." title="Диапазон">900</entry>
-    </entry>
+  <entry key="star" type="object" description="Параметры визуализации для взаимодействия." title="Звёзды">
     <entry key="hover" type="object" description="Параметры отображения дистанции при наведении на звезду." title="Наведение">
       <entry key="lineColor" type="string" description="Цвет луча от корабля до звезды." title="Цвет луча">#ffffff</entry>
       <entry key="lineOpacity" type="number" description="Прозрачность луча." title="Прозрачность луча">0.65</entry>

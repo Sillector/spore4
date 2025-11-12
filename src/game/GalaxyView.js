@@ -2,18 +2,8 @@ import * as THREE from 'three';
 import { getConfig } from '../config/store.js';
 import { createFollowTarget } from './targets.js';
 import { createSeedKey, createWorldRandom } from './random.js';
-
-const STAR_COLOR_PRESETS = [
-  { hue: 0.02, saturation: 0.78, lightness: 0.56, emissiveMultiplier: 0.8 },
-  { hue: 0.12, saturation: 0.72, lightness: 0.62, emissiveMultiplier: 0.75 },
-  { hue: 0, saturation: 0.04, lightness: 0.92, emissiveMultiplier: 0.7 },
-  { hue: 0.58, saturation: 0.64, lightness: 0.68, emissiveMultiplier: 0.85 }
-];
-const STAR_COLOR_VARIANCE = {
-  hue: 0.015,
-  saturation: 0.06,
-  lightness: 0.05
-};
+import { createStarMesh } from './starFactory.js';
+import { tickStarMaterial } from './starShader.js';
 
 const galaxyConfig = getConfig('galaxy');
 const shipConfig = getConfig('ship');
@@ -32,7 +22,6 @@ export class GalaxyView {
     this.group.rotation.x = THREE.MathUtils.degToRad(this.config.groupTilt.far);
     this.group.name = 'Galaxy';
     this.scene.add(this.group);
-    this.starPalette = this.createPalette();
     this.hoverSettings = this.createHoverSettings();
     this.populateStars();
     this.hoverState = this.createHoverState();
@@ -44,7 +33,7 @@ export class GalaxyView {
     for (let i = 0; i < this.config.starCount; i += 1) {
       const starKey = createSeedKey('star', i);
       const starRandom = createWorldRandom('galaxy', starKey);
-      const star = this.createStar(starRandom);
+      const starMesh = createStarMesh('galaxy', starRandom);
       const radius = Math.sqrt(starRandom.next()) * this.config.radius;
       const theta = starRandom.float(0, Math.PI * 2);
       const distanceFactor = 1 - radius / this.config.radius;
@@ -55,69 +44,15 @@ export class GalaxyView {
       );
       const y = starRandom.floatSpread(heightRange);
       temp.set(Math.cos(theta) * radius, y, Math.sin(theta) * radius);
-      star.position.copy(temp);
-      star.userData.position = temp.clone();
-      star.userData.id = i;
-      star.userData.seedKey = starKey;
-      star.userData.systemSeed = i;
-      this.group.add(star);
-      this.state.galaxyStars.push(star.userData);
+      starMesh.position.copy(temp);
+      starMesh.userData.position = temp.clone();
+      starMesh.userData.id = i;
+      starMesh.userData.seedKey = starKey;
+      starMesh.userData.systemSeed = i;
+      starMesh.userData.mesh = starMesh;
+      this.group.add(starMesh);
+      this.state.galaxyStars.push(starMesh.userData);
     }
-  }
-
-  createStar(randomGenerator) {
-    const palette = this.starPalette.length ? this.starPalette : STAR_COLOR_PRESETS;
-    const preset = randomGenerator.pick(palette) ?? palette[0];
-    const hue = THREE.MathUtils.clamp(
-      preset.hue + randomGenerator.floatSpread(preset.hueVariance ?? STAR_COLOR_VARIANCE.hue),
-      0,
-      1
-    );
-    const saturation = THREE.MathUtils.clamp(
-      preset.saturation +
-        randomGenerator.floatSpread(
-          preset.saturationVariance ?? STAR_COLOR_VARIANCE.saturation
-        ),
-      0,
-      1
-    );
-    const lightness = THREE.MathUtils.clamp(
-      preset.lightness +
-        randomGenerator.floatSpread(
-          preset.lightnessVariance ?? STAR_COLOR_VARIANCE.lightness
-        ),
-      0,
-      1
-    );
-    const color = new THREE.Color().setHSL(hue, saturation, lightness);
-    const emissiveMultiplier =
-      preset.emissiveMultiplier ?? this.config.star.color.emissiveMultiplier ?? 1;
-    const geometry = new THREE.SphereGeometry(
-      this.config.star.geometry.radius,
-      this.config.star.geometry.widthSegments,
-      this.config.star.geometry.heightSegments
-    );
-    const material = new THREE.MeshStandardMaterial({
-      color,
-      emissive: color
-        .clone()
-        .multiplyScalar(emissiveMultiplier),
-      emissiveIntensity: this.config.star.material.emissiveIntensity,
-      roughness: this.config.star.material.roughness,
-      metalness: this.config.star.material.metalness
-    });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    const nameMin = this.config.star.name.min;
-    const nameMax = nameMin + this.config.star.name.maxRange - 1;
-    mesh.userData = {
-      name: `${this.config.star.name.prefix}${randomGenerator.int(nameMin, nameMax)}`,
-      color,
-      mesh
-    };
-    mesh.userData.mesh = mesh;
-    return mesh;
   }
 
   findClosestStar() {
@@ -168,6 +103,15 @@ export class GalaxyView {
 
   update(delta, ship, camera) {
     this.group.rotation.y += delta * this.config.rotationSpeed;
+
+    // анимируем шейдер звёзд
+    for (const obj of this.group.children) {
+      const mat = obj.material;
+      if (mat && mat.userData && mat.userData.isStarShader) {
+        tickStarMaterial(mat, delta);
+      }
+    }
+
     const rawProgress = Math.min(this.state.zoomProgress.galaxy, this.cameraZoomLimit);
     const targetZoom = THREE.MathUtils.clamp(
       rawProgress / this.cameraZoomLimit,
@@ -329,40 +273,6 @@ export class GalaxyView {
     context.fillText(text, canvas.width / 2, canvas.height / 2);
     texture.needsUpdate = true;
     label.userData.text = text;
-  }
-
-  createPalette() {
-    const palette = this.config?.star?.color?.palette;
-    const varianceDefaults = this.config?.star?.color?.variance ?? {};
-    const defaultVariance = {
-      hue: varianceDefaults.hue ?? STAR_COLOR_VARIANCE.hue,
-      saturation: varianceDefaults.saturation ?? STAR_COLOR_VARIANCE.saturation,
-      lightness: varianceDefaults.lightness ?? STAR_COLOR_VARIANCE.lightness
-    };
-    const defaultEmissive = this.config?.star?.color?.emissiveMultiplier ?? 1;
-    if (Array.isArray(palette) && palette.length > 0) {
-      return palette.map((preset) => ({
-        hue: preset.hue ?? 0,
-        saturation: preset.saturation ?? 0.7,
-        lightness: preset.lightness ?? 0.6,
-        hueVariance:
-          preset.hueVariance ?? preset.variance?.hue ?? defaultVariance.hue,
-        saturationVariance:
-          preset.saturationVariance ?? preset.variance?.saturation ?? defaultVariance.saturation,
-        lightnessVariance:
-          preset.lightnessVariance ?? preset.variance?.lightness ?? defaultVariance.lightness,
-        emissiveMultiplier: preset.emissiveMultiplier ?? defaultEmissive
-      }));
-    }
-    return STAR_COLOR_PRESETS.map((preset) => ({
-      hue: preset.hue,
-      saturation: preset.saturation,
-      lightness: preset.lightness,
-      hueVariance: defaultVariance.hue,
-      saturationVariance: defaultVariance.saturation,
-      lightnessVariance: defaultVariance.lightness,
-      emissiveMultiplier: preset.emissiveMultiplier ?? defaultEmissive
-    }));
   }
 
   createHoverSettings() {

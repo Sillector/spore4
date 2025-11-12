@@ -1,0 +1,25 @@
+<config name="stars" title="Звёзды">
+  <entry key="radiusMin" type="number" description="Базовый минимальный радиус звезды." title="Мин. радиус">1</entry>
+  <entry key="radiusMax" type="number" description="Базовый максимальный радиус звезды." title="Макс. радиус">2</entry>
+  <entry key="brightness" type="object" title="Яркость">
+    <entry key="intensity" type="number" description="Множитель яркости каустики." title="Интенсивность свечения">2</entry>
+    <entry key="glow" type="number" description="Сила мягкого свечения по краям." title="Сила ореола">2</entry>
+  </entry>
+  <entry key="color" type="object" title="Цвета">
+    <entry key="palette" type="array" description="Набор возможных цветов звёзд (hex)." title="Палитра">
+      <item type="string">#bb9a58</item>
+      <item type="string">#bfbfbf</item>
+      <item type="string">#3973ac</item>
+      <item type="string">#c46e6e</item>
+    </entry>
+  </entry>
+  <entry key="shader" type="object" title="Шейдер">
+    <entry key="scale" type="number" title="Масштаб каустики">5</entry>
+    <entry key="speed" type="number" title="Скорость анимации">0.7</entry>
+  </entry>
+  <entry key="scale" type="object" description="Множители радиуса для разных режимов, чтобы один диапазон подходил и галактике, и системе." title="Масштабы контекстов">
+    <entry key="galaxy" type="number" title="Галактика">1</entry>
+    <entry key="system" type="number" title="Система">5</entry>
+  </entry>
+</config>
+

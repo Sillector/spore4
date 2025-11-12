@@ -1,6 +1,6 @@
 <config name="scene" title="Трёхмерная сцена">
   <entry key="renderer" type="object" description="Настройки рендера трёхмерной сцены." title="Рендерер">
-    <entry key="pixelRatioMax" type="number" description="Максимальный коэффициент pixel ratio для повышения чёткости." title="Максимальный pixel ratio">2</entry>
+    <entry key="pixelRatioMax" type="number" description="Максимальный коэффициент pixel ratio для повышения чёткости." title="Максимальный pixel ratio">16</entry>
     <entry key="antialias" type="boolean" description="Включение аппаратного сглаживания в рендерере." title="Сглаживание">true</entry>
   </entry>
   <entry key="scene" type="object" description="Параметры базовой сцены Three.js." title="Сцена">
