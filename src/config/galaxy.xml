@@ -1,4 +1,4 @@
-<config name="galaxy">
+<config name="galaxy" title="Галактика">
   <entry key="starCount" type="number" description="Количество звёзд, создаваемых при генерации галактики.">70</entry>
   <entry key="radius" type="number" description="Радиус распределения звёзд относительно центра галактики.">120</entry>
   <entry key="thickness" type="number" description="Толщина диска галактики вдоль оси Y.">14</entry>
@@ -12,6 +12,7 @@
     <entry key="thicknessFactor" type="number" description="Множитель, влияющий на высоту в зависимости от толщины диска.">0.17</entry>
   </entry>
   <entry key="zoom" type="object" description="Настройки масштабирования камеры в режиме галактики.">
+    <entry key="defaultProgress" type="number" description="Начальное значение шкалы приближения при открытии галактической карты.">1.7</entry>
     <entry key="step" type="number" description="Шаг изменения масштаба за единичное действие пользователя.">0.16</entry>
     <entry key="enterThreshold" type="number" description="Порог масштаба, при котором запускается переход в систему.">2</entry>
     <entry key="cameraLimit" type="number" description="Максимальное значение прогресса, влияющего на приближение камеры перед переходом в систему.">1.7</entry>

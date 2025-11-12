@@ -1,4 +1,4 @@
-<config name="scene">
+<config name="scene" title="Трёхмерная сцена">
   <entry key="renderer" type="object" description="Настройки рендера трёхмерной сцены.">
     <entry key="pixelRatioMax" type="number" description="Максимальный коэффициент pixel ratio для повышения чёткости.">2</entry>
     <entry key="antialias" type="boolean" description="Включение аппаратного сглаживания в рендерере.">true</entry>

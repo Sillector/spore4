@@ -1,4 +1,4 @@
-<config name="system">
+<config name="system" title="Планетные системы">
   <entry key="planetsPerSystem" type="number" description="Количество планет, генерируемых в одной системе.">6</entry>
   <entry key="rotationSpeed" type="number" description="Скорость вращения планетарной системы.">0.05</entry>
   <entry key="zoom" type="object" description="Настройки масштабирования камеры в системе.">

@@ -1,6 +1,7 @@
 import { getConfig } from '../config/store.js';
 
 const orbitConfig = getConfig('orbit');
+const galaxyConfig = getConfig('galaxy');
 
 export class GameState {
   constructor() {
@@ -10,13 +11,17 @@ export class GameState {
     this.currentSystem = null;
     this.currentPlanet = null;
     this.pressedKeys = new Set();
-    this.zoomProgress = {
-      galaxy: 0,
+    this.zoomDefaults = {
+      galaxy: galaxyConfig?.zoom?.defaultProgress ?? 0,
       system: 0
     };
+    this.zoomProgress = {
+      galaxy: this.zoomDefaults.galaxy,
+      system: this.zoomDefaults.system
+    };
     this.zoomSmooth = {
-      galaxy: 0,
-      system: 0
+      galaxy: this.zoomDefaults.galaxy,
+      system: this.zoomDefaults.system
     };
     this.orbitMotion = {
       theta: (orbitConfig.initialAngles.theta * Math.PI) / 180,
@@ -30,12 +35,12 @@ export class GameState {
 
   resetZoom(level) {
     if (!level || level === 'galaxy') {
-      this.zoomProgress.galaxy = 0;
-      this.zoomSmooth.galaxy = 0;
+      this.zoomProgress.galaxy = this.zoomDefaults.galaxy;
+      this.zoomSmooth.galaxy = this.zoomDefaults.galaxy;
     }
     if (!level || level === 'system') {
-      this.zoomProgress.system = 0;
-      this.zoomSmooth.system = 0;
+      this.zoomProgress.system = this.zoomDefaults.system;
+      this.zoomSmooth.system = this.zoomDefaults.system;
     }
   }
 

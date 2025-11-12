@@ -170,7 +170,12 @@ export function parseConfigXml(xmlSource) {
   }
   const meta = {};
   const data = parseEntries(root.entry, [], meta);
-  return { name: root['@_name'] || '', data, meta };
+  return {
+    name: root['@_name'] || '',
+    title: root['@_title'] || root['@_name'] || '',
+    data,
+    meta
+  };
 }
 
 export function serializeConfigXml(name, data, meta) {

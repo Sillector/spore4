@@ -1,4 +1,4 @@
-<config name="background">
+<config name="background" title="Фоновая сцена">
   <entry key="starCount" type="number" description="Количество фоновых звёзд, используемых для заполнения сцены.">2000</entry>
   <entry key="radius" type="number" description="Радиус сферы, в пределах которой распределяются фоновые звёзды.">600</entry>
   <entry key="color" type="object" description="Настройки оттенка и яркости фоновых звёзд.">

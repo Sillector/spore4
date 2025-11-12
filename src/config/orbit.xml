@@ -1,4 +1,4 @@
-<config name="orbit">
+<config name="orbit" title="Орбита">
   <entry key="radius" type="object" description="Диапазон и базовые значения орбиты планеты.">
     <entry key="min" type="number" description="Минимально допустимый радиус орбиты.">20</entry>
     <entry key="max" type="number" description="Максимально допустимый радиус орбиты.">40</entry>

@@ -1,4 +1,4 @@
-<config name="ship">
+<config name="ship" title="Корабль">
   <entry key="speeds" type="object" description="Скорости перемещения корабля в разных режимах.">
     <entry key="galaxy" type="number" description="Скорость перемещения корабля по галактической карте.">12</entry>
     <entry key="system" type="number" description="Скорость перемещения корабля внутри системы.">9</entry>
