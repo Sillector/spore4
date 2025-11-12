@@ -1,11 +1,21 @@
 <config name="background" title="Фоновая сцена">
-  <entry key="starCount" type="number" description="Количество фоновых звёзд, используемых для заполнения сцены." title="Количество звёзд">2000</entry>
+  <entry key="starCount" type="number" description="Количество фоновых звёзд, используемых для заполнения сцены." title="Количество звёзд">1000</entry>
   <entry key="star" type="object" description="Параметры точек на скайбоксе." title="Псевдо‑звезды">
-    <entry key="sizeMin" type="number" description="Минимальный радиус точки (px)." title="Минимальный размер">0.6</entry>
-    <entry key="sizeMax" type="number" description="Максимальный радиус точки (px)." title="Максимальный размер">1.8</entry>
-    <entry key="colorMain" type="string" description="Основной цвет звёзд (CSS цвет)." title="Основной цвет">#ffffff</entry>
-    <entry key="colorAlt" type="string" description="Фиолетовый оттенок для части звёзд." title="Альтернативный цвет">#c8a0ff</entry>
+    <entry key="sizeMin" type="number" description="Минимальный радиус точки (px)." title="Минимальный размер">0.2</entry>
+    <entry key="sizeMax" type="number" description="Максимальный радиус точки (px)." title="Максимальный размер">1.1</entry>
+    <entry key="colorMain" type="color" description="Основной цвет звёзд (CSS цвет)." title="Основной цвет">#ffffff</entry>
+    <entry key="colorAlt" type="color" description="Фиолетовый оттенок для части звёзд." title="Альтернативный цвет">#c8a0ff</entry>
     <entry key="altProbability" type="number" description="Доля звёзд с фиолетовым оттенком (0..1)." title="Вероятность альтернативного цвета">0.12</entry>
+  </entry>
+  <entry key="glow" type="object" description="Параметры радиального фиолетового свечения." title="Фоновое свечение">
+    <entry key="centerX" type="number" description="Позиция центра по X в долях ширины (0..1)." title="Центр X">0.5</entry>
+    <entry key="centerY" type="number" description="Позиция центра по Y в долях высоты (0..1)." title="Центр Y">0.45</entry>
+    <entry key="innerRadiusFactor" type="number" description="Доля от min(width,height)." title="Внутренний радиус">0.1</entry>
+    <entry key="outerRadiusFactor" type="number" description="Доля от max(width,height)." title="Внешний радиус">0.7</entry>
+    <entry key="innerColor" type="color" description="Цвет в центре свечения." title="Внутренний цвет">#8240b5</entry>
+    <entry key="innerAlpha" type="number" description="0..1" title="Прозрачность центра">0.25</entry>
+    <entry key="outerColor" type="color" description="Цвет на краю свечения." title="Внешний цвет">#0a0612</entry>
+    <entry key="outerAlpha" type="number" description="0..1" title="Прозрачность края">1</entry>
   </entry>
 </config>
 

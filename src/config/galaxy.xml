@@ -5,7 +5,7 @@
   <entry key="rotationSpeed" type="number" description="Скорость вращения звёздного массива в радианах за кадр." title="Скорость вращения">0.01</entry>
   <entry key="groupTilt" type="object" description="Наклон дальних и ближних рукавов для создания объёма." title="Наклон рукавов">
     <entry key="far" type="number" description="Наклон дальних групп в градусах относительно плоскости галактики." title="Дальний наклон">78</entry>
-    <entry key="near" type="number" description="Наклон ближних групп в градусах относительно плоскости галактики." title="Ближний наклон">45</entry>
+    <entry key="near" type="number" description="Наклон ближних групп в градусах относительно плоскости галактики." title="Ближний наклон">30</entry>
   </entry>
   <entry key="heightRange" type="object" description="Параметры распределения высоты звёзд над плоскостью галактики." title="Диапазон высот">
     <entry key="base" type="number" description="Базовое значение высоты для звёзд." title="Базовая высота">0.6</entry>

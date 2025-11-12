@@ -26,7 +26,7 @@
         <template v-else>
           <input
             class="dev-panel__input"
-            :type="entry.fieldType === 'number' ? 'number' : 'text'"
+            :type="inputType(entry.fieldType)"
             :step="entry.fieldType === 'number' ? 'any' : undefined"
             :value="entry.value"
             @input="onInput(entry.path, $event.target.value, entry.fieldType)"
@@ -93,8 +93,28 @@ const entries = computed(() => {
     }
 
     let fieldType = baseType;
-    if (fieldType !== 'boolean' && fieldType !== 'number') {
+    // Определяем цветовые поля
+    if (fieldType === 'string') {
+      const label = (title || key).toLowerCase();
+      const isColorKey = label.includes('цвет') || key.toLowerCase().includes('color');
+      const sample = typeof originalValue === 'string' ? originalValue : String(value ?? '');
+      const isHexColor = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(sample);
+      if (isColorKey || isHexColor) {
+        fieldType = 'color';
+      }
+    }
+
+    if (fieldType !== 'boolean' && fieldType !== 'number' && fieldType !== 'color') {
       fieldType = 'text';
+    }
+
+    // Гарантируем корректное значение для color input
+    let displayValue = value ?? '';
+    if (fieldType === 'boolean') {
+      displayValue = Boolean(value);
+    } else if (fieldType === 'color') {
+      const v = typeof value === 'string' ? value : String(value ?? '');
+      displayValue = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v) ? v : '#000000';
     }
 
     return {
@@ -103,7 +123,7 @@ const entries = computed(() => {
       label: title || key,
       path: nextPath,
       description,
-      value: fieldType === 'boolean' ? Boolean(value) : value ?? '',
+      value: displayValue,
       fieldType
     };
   });
@@ -119,5 +139,11 @@ function onInput(path, value, fieldType) {
 
 function onCheckboxChange(path, value) {
   emit('update', { path, value, fieldType: 'boolean' });
+}
+
+function inputType(fieldType) {
+  if (fieldType === 'number') return 'number';
+  if (fieldType === 'color') return 'color';
+  return 'text';
 }
 </script>

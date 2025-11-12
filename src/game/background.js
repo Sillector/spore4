@@ -12,18 +12,33 @@ export function createBackgroundNebula(scene) {
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  // Базовый тёмный фон
-  ctx.fillStyle = '#0a0612';
+  // Параметры свечения из конфига
+  const glow = backgroundConfig.glow || {};
+  const centerX = Number.isFinite(glow.centerX) ? glow.centerX : 0.5;
+  const centerY = Number.isFinite(glow.centerY) ? glow.centerY : 0.45;
+  const innerRadiusFactor = Number.isFinite(glow.innerRadiusFactor) ? glow.innerRadiusFactor : 0.1;
+  const outerRadiusFactor = Number.isFinite(glow.outerRadiusFactor) ? glow.outerRadiusFactor : 0.7;
+  const innerColorHex = glow.innerColor || '#8c3cc8';
+  const outerColorHex = glow.outerColor || '#0a0612';
+  const innerAlpha = Number.isFinite(glow.innerAlpha) ? glow.innerAlpha : 0.25;
+  const outerAlpha = Number.isFinite(glow.outerAlpha) ? glow.outerAlpha : 1;
+
+  const innerColor = new THREE.Color(innerColorHex);
+  const outerColor = new THREE.Color(outerColorHex);
+  const rgba = (color, a) => `rgba(${Math.round(color.r * 255)},${Math.round(color.g * 255)},${Math.round(color.b * 255)},${a})`;
+
+  // Базовый тёмный фон (соответствует внешнему цвету свечения)
+  ctx.fillStyle = rgba(outerColor, 1);
   ctx.fillRect(0, 0, width, height);
 
-  // Лёгкое фоновое фиолетовое свечение (радиальный градиент)
-  const cx = width * 0.5;
-  const cy = height * 0.45;
-  const innerR = Math.min(width, height) * 0.1;
-  const outerR = Math.max(width, height) * 0.7;
+  // Лёгкое фоновое свечение (радиальный градиент)
+  const cx = width * centerX;
+  const cy = height * centerY;
+  const innerR = Math.min(width, height) * innerRadiusFactor;
+  const outerR = Math.max(width, height) * outerRadiusFactor;
   const grad = ctx.createRadialGradient(cx, cy, innerR, cx, cy, outerR);
-  grad.addColorStop(0, 'rgba(140, 60, 200, 0.25)');
-  grad.addColorStop(1, 'rgba(10, 6, 18, 1)');
+  grad.addColorStop(0, rgba(innerColor, innerAlpha));
+  grad.addColorStop(1, rgba(outerColor, outerAlpha));
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, width, height);
 

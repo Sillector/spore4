@@ -1,11 +1,11 @@
 <config name="ship" title="Корабль">
   <entry key="speeds" type="object" description="Скорости перемещения корабля в разных режимах." title="Скорости">
-    <entry key="galaxy" type="number" description="Скорость перемещения корабля по галактической карте." title="Галактика">12</entry>
+    <entry key="galaxy" type="number" description="Скорость перемещения корабля по галактической карте." title="Галактика">3</entry>
     <entry key="system" type="number" description="Скорость перемещения корабля внутри системы." title="Система">9</entry>
   </entry>
   <entry key="movement" type="object" description="Параметры следования и остановки корабля." title="Движение">
     <entry key="follow" type="object" description="Настройки сглаживания движения корабля." title="Следование">
-      <entry key="rate" type="number" description="Скорость интерполяции корабля к целевой точке." title="Скорость следования">8</entry>
+      <entry key="rate" type="number" description="Скорость интерполяции корабля к целевой точке." title="Скорость следования">2</entry>
       <entry key="min" type="number" description="Минимальный коэффициент сглаживания." title="Минимальное сглаживание">0.08</entry>
       <entry key="max" type="number" description="Максимальный коэффициент сглаживания." title="Максимальное сглаживание">0.55</entry>
     </entry>
