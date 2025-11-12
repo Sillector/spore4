@@ -115,9 +115,18 @@ export class SpaceGame {
 
   onPointerMove(event) {
     const rect = this.renderer.domElement.getBoundingClientRect();
-    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-    this.updateHoverSelection();
+      const localX = event.clientX - rect.left;
+      const localY = event.clientY - rect.top;
+      this.pointer.x = (localX / rect.width) * 2 - 1;
+      this.pointer.y = -(localY / rect.height) * 2 + 1;
+      if (this.state.level === 'system') {
+          this.updateSystemHover();
+      } else {
+          this.systemView.setHoveredPlanet(null);
+      }
+      this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      this.updateHoverSelection();
   }
 
   onPointerDown(event) {
@@ -133,10 +142,12 @@ export class SpaceGame {
   }
 
   onPointerLeave() {
-    this.pointer.set(0, 0);
-    this.hoveredStar = null;
-    this.galaxyView.setHoveredStar(null);
+    this.systemView.setHoveredPlanet(null);
+      this.pointer.set(0, 0);
+      this.hoveredStar = null;
+      this.galaxyView.setHoveredStar(null);
   }
+
 
   onWheel(event) {
     event.preventDefault();
@@ -188,6 +199,7 @@ export class SpaceGame {
   enterSystem(starData) {
     if (!starData) return;
     this.state.level = 'transition';
+    this.systemView.setHoveredPlanet(null);
     this.hoveredStar = null;
     this.galaxyView.setHoveredStar(null);
     this.galaxyView.setVisible(false);
@@ -199,6 +211,7 @@ export class SpaceGame {
     this.systemView.exit();
     this.orbitController.exit(this.ship, null);
     this.galaxyView.setVisible(true);
+    this.systemView.setHoveredPlanet(null);
     const target = this.state.currentStar
       ? createFollowTarget(
           this.state.currentStar.mesh,
@@ -217,6 +230,7 @@ export class SpaceGame {
 
   enterOrbit(planetData) {
     if (!planetData) return;
+    this.systemView.setHoveredPlanet(null);
     this.systemView.setVisible(false);
     this.orbitController.enter(planetData, this.ship, this.camera);
   }
@@ -230,6 +244,20 @@ export class SpaceGame {
     this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+  }
+
+  updateSystemHover() {
+    const intersects = this.pickIntersectables();
+    if (!intersects.length) {
+      this.systemView.setHoveredPlanet(null);
+      return;
+    }
+    const planet = intersects[0].object.userData;
+    if (!planet?.mesh) {
+      this.systemView.setHoveredPlanet(null);
+      return;
+    }
+    this.systemView.setHoveredPlanet(planet);
   }
 
   animate() {
