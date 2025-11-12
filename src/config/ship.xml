@@ -1,39 +1,39 @@
 <config name="ship" title="Корабль">
-  <entry key="speeds" type="object" description="Скорости перемещения корабля в разных режимах.">
-    <entry key="galaxy" type="number" description="Скорость перемещения корабля по галактической карте.">12</entry>
-    <entry key="system" type="number" description="Скорость перемещения корабля внутри системы.">9</entry>
+  <entry key="speeds" type="object" title="Скорости" description="Скорости перемещения корабля в разных режимах.">
+    <entry key="galaxy" type="number" title="Галактика" description="Скорость перемещения корабля по галактической карте.">12</entry>
+    <entry key="system" type="number" title="Система" description="Скорость перемещения корабля внутри системы.">9</entry>
   </entry>
-  <entry key="movement" type="object" description="Параметры следования и остановки корабля.">
-    <entry key="follow" type="object" description="Настройки сглаживания движения корабля.">
-      <entry key="rate" type="number" description="Скорость интерполяции корабля к целевой точке.">8</entry>
-      <entry key="min" type="number" description="Минимальный коэффициент сглаживания.">0.08</entry>
-      <entry key="max" type="number" description="Максимальный коэффициент сглаживания.">0.55</entry>
+  <entry key="movement" type="object" title="Движение" description="Параметры следования и остановки корабля.">
+    <entry key="follow" type="object" title="Следование" description="Настройки сглаживания движения корабля.">
+      <entry key="rate" type="number" title="Скорость следования" description="Скорость интерполяции корабля к целевой точке.">8</entry>
+      <entry key="min" type="number" title="Минимальное сглаживание" description="Минимальный коэффициент сглаживания.">0.08</entry>
+      <entry key="max" type="number" title="Максимальное сглаживание" description="Максимальный коэффициент сглаживания.">0.55</entry>
     </entry>
-    <entry key="arrivalThreshold" type="number" description="Расстояние до цели, при котором корабль считает, что прибыл.">0.05</entry>
+    <entry key="arrivalThreshold" type="number" title="Порог прибытия" description="Расстояние до цели, при котором корабль считает, что прибыл.">0.05</entry>
   </entry>
-  <entry key="geometry" type="object" description="Размеры и детализация модели корабля.">
-    <entry key="radius" type="number" description="Радиус корпуса корабля.">0.7</entry>
-    <entry key="height" type="number" description="Высота корпуса корабля.">2.2</entry>
-    <entry key="radialSegments" type="number" description="Количество сегментов вокруг корпуса.">12</entry>
+  <entry key="geometry" type="object" title="Геометрия" description="Размеры и детализация модели корабля.">
+    <entry key="radius" type="number" title="Радиус" description="Радиус корпуса корабля.">0.7</entry>
+    <entry key="height" type="number" title="Высота" description="Высота корпуса корабля.">2.2</entry>
+    <entry key="radialSegments" type="number" title="Сегменты" description="Количество сегментов вокруг корпуса.">12</entry>
   </entry>
-  <entry key="material" type="object" description="Параметры материала корабля.">
-    <entry key="color" type="string" description="Основной цвет корпуса корабля.">#ffdd55</entry>
-    <entry key="roughness" type="number" description="Шероховатость материала корпуса.">0.3</entry>
-    <entry key="metalness" type="number" description="Металличность материала корпуса.">0.4</entry>
-    <entry key="emissive" type="string" description="Цвет свечения корпуса.">#332200</entry>
-    <entry key="emissiveIntensity" type="number" description="Интенсивность эмиссионного свечения корпуса.">0.6</entry>
+  <entry key="material" type="object" title="Материал" description="Параметры материала корабля.">
+    <entry key="color" type="string" title="Цвет" description="Основной цвет корпуса корабля.">#ffdd55</entry>
+    <entry key="roughness" type="number" title="Шероховатость" description="Шероховатость материала корпуса.">0.3</entry>
+    <entry key="metalness" type="number" title="Металличность" description="Металличность материала корпуса.">0.4</entry>
+    <entry key="emissive" type="string" title="Цвет свечения" description="Цвет свечения корпуса.">#332200</entry>
+    <entry key="emissiveIntensity" type="number" title="Интенсивность свечения" description="Интенсивность эмиссионного свечения корпуса.">0.6</entry>
   </entry>
-  <entry key="rotation" type="object" description="Поворот корабля относительно осей.">
-    <entry key="x" type="number" description="Угол поворота корабля вокруг оси X.">90</entry>
+  <entry key="rotation" type="object" title="Поворот" description="Поворот корабля относительно осей.">
+    <entry key="x" type="number" title="Угол X" description="Угол поворота корабля вокруг оси X.">90</entry>
   </entry>
-  <entry key="trail" type="object" description="Параметры выхлопного шлейфа корабля.">
-    <entry key="radiusTop" type="number" description="Радиус верхней части шлейфа.">0.2</entry>
-    <entry key="radiusBottom" type="number" description="Радиус нижней части шлейфа.">0</entry>
-    <entry key="height" type="number" description="Высота шлейфа.">1.6</entry>
-    <entry key="radialSegments" type="number" description="Количество сегментов шлейфа по окружности.">8</entry>
-    <entry key="openEnded" type="boolean" description="Флаг, определяющий открыт ли низ шлейфа.">true</entry>
-    <entry key="color" type="string" description="Цвет свечения шлейфа.">#77c6ff</entry>
-    <entry key="opacity" type="number" description="Прозрачность шлейфа.">0.55</entry>
-    <entry key="offsetZ" type="number" description="Смещение шлейфа относительно корабля по оси Z.">-0.8</entry>
+  <entry key="trail" type="object" title="Шлейф" description="Параметры выхлопного шлейфа корабля.">
+    <entry key="radiusTop" type="number" title="Радиус сверху" description="Радиус верхней части шлейфа.">0.2</entry>
+    <entry key="radiusBottom" type="number" title="Радиус снизу" description="Радиус нижней части шлейфа.">0</entry>
+    <entry key="height" type="number" title="Высота" description="Высота шлейфа.">1.6</entry>
+    <entry key="radialSegments" type="number" title="Сегменты" description="Количество сегментов шлейфа по окружности.">8</entry>
+    <entry key="openEnded" type="boolean" title="Открытый низ" description="Флаг, определяющий открыт ли низ шлейфа.">true</entry>
+    <entry key="color" type="string" title="Цвет" description="Цвет свечения шлейфа.">#77c6ff</entry>
+    <entry key="opacity" type="number" title="Прозрачность" description="Прозрачность шлейфа.">0.55</entry>
+    <entry key="offsetZ" type="number" title="Смещение Z" description="Смещение шлейфа относительно корабля по оси Z.">-0.8</entry>
   </entry>
 </config>

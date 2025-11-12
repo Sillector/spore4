@@ -1,37 +1,37 @@
 <config name="scene" title="Трёхмерная сцена">
-  <entry key="renderer" type="object" description="Настройки рендера трёхмерной сцены.">
-    <entry key="pixelRatioMax" type="number" description="Максимальный коэффициент pixel ratio для повышения чёткости.">2</entry>
-    <entry key="antialias" type="boolean" description="Включение аппаратного сглаживания в рендерере.">true</entry>
+  <entry key="renderer" type="object" title="Рендерер" description="Настройки рендера трёхмерной сцены.">
+    <entry key="pixelRatioMax" type="number" title="Максимальный pixel ratio" description="Максимальный коэффициент pixel ratio для повышения чёткости.">2</entry>
+    <entry key="antialias" type="boolean" title="Сглаживание" description="Включение аппаратного сглаживания в рендерере.">true</entry>
   </entry>
-  <entry key="scene" type="object" description="Параметры базовой сцены Three.js.">
-    <entry key="backgroundColor" type="string" description="Цвет фона сцены.">#02040a</entry>
+  <entry key="scene" type="object" title="Сцена" description="Параметры базовой сцены Three.js.">
+    <entry key="backgroundColor" type="string" title="Цвет фона" description="Цвет фона сцены.">#02040a</entry>
   </entry>
-  <entry key="camera" type="object" description="Базовая конфигурация камеры.">
-    <entry key="fov" type="number" description="Угол обзора камеры в градусах.">60</entry>
-    <entry key="near" type="number" description="Ближняя плоскость отсечения камеры.">0.1</entry>
-    <entry key="far" type="number" description="Дальняя плоскость отсечения камеры.">1000</entry>
-    <entry key="initialPosition" type="object" description="Начальная позиция камеры в сцене.">
-      <entry key="x" type="number" description="Координата камеры по оси X при запуске.">0</entry>
-      <entry key="y" type="number" description="Координата камеры по оси Y при запуске.">52</entry>
-      <entry key="z" type="number" description="Координата камеры по оси Z при запуске.">165</entry>
+  <entry key="camera" type="object" title="Камера" description="Базовая конфигурация камеры.">
+    <entry key="fov" type="number" title="Угол обзора" description="Угол обзора камеры в градусах.">60</entry>
+    <entry key="near" type="number" title="Ближняя плоскость" description="Ближняя плоскость отсечения камеры.">0.1</entry>
+    <entry key="far" type="number" title="Дальняя плоскость" description="Дальняя плоскость отсечения камеры.">1000</entry>
+    <entry key="initialPosition" type="object" title="Начальная позиция" description="Начальная позиция камеры в сцене.">
+      <entry key="x" type="number" title="Координата X" description="Координата камеры по оси X при запуске.">0</entry>
+      <entry key="y" type="number" title="Координата Y" description="Координата камеры по оси Y при запуске.">52</entry>
+      <entry key="z" type="number" title="Координата Z" description="Координата камеры по оси Z при запуске.">165</entry>
     </entry>
   </entry>
-  <entry key="lights" type="object" description="Освещение сцены.">
-    <entry key="ambient" type="object" description="Параметры фонового освещения.">
-      <entry key="color" type="string" description="Цвет фонового света.">#6f83ff</entry>
-      <entry key="intensity" type="number" description="Интенсивность фонового освещения.">0.35</entry>
+  <entry key="lights" type="object" title="Освещение" description="Освещение сцены.">
+    <entry key="ambient" type="object" title="Фоновый свет" description="Параметры фонового освещения.">
+      <entry key="color" type="string" title="Цвет" description="Цвет фонового света.">#6f83ff</entry>
+      <entry key="intensity" type="number" title="Интенсивность" description="Интенсивность фонового освещения.">0.35</entry>
     </entry>
-    <entry key="directional" type="object" description="Параметры направленного света.">
-      <entry key="color" type="string" description="Цвет направленного света.">#ffffff</entry>
-      <entry key="intensity" type="number" description="Интенсивность направленного света.">0.6</entry>
-      <entry key="position" type="object" description="Позиция источника направленного света.">
-        <entry key="x" type="number" description="Координата источника света по оси X.">50</entry>
-        <entry key="y" type="number" description="Координата источника света по оси Y.">80</entry>
-        <entry key="z" type="number" description="Координата источника света по оси Z.">40</entry>
+    <entry key="directional" type="object" title="Направленный свет" description="Параметры направленного света.">
+      <entry key="color" type="string" title="Цвет" description="Цвет направленного света.">#ffffff</entry>
+      <entry key="intensity" type="number" title="Интенсивность" description="Интенсивность направленного света.">0.6</entry>
+      <entry key="position" type="object" title="Позиция" description="Позиция источника направленного света.">
+        <entry key="x" type="number" title="Координата X" description="Координата источника света по оси X.">50</entry>
+        <entry key="y" type="number" title="Координата Y" description="Координата источника света по оси Y.">80</entry>
+        <entry key="z" type="number" title="Координата Z" description="Координата источника света по оси Z.">40</entry>
       </entry>
     </entry>
   </entry>
-  <entry key="input" type="object" description="Параметры ввода пользователя.">
-    <entry key="orbitWheelScale" type="number" description="Множитель скорости масштабирования колесом мыши.">140</entry>
+  <entry key="input" type="object" title="Ввод" description="Параметры ввода пользователя.">
+    <entry key="orbitWheelScale" type="number" title="Колесо мыши" description="Множитель скорости масштабирования колесом мыши.">140</entry>
   </entry>
 </config>

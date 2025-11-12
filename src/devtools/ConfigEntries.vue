@@ -77,13 +77,14 @@ const entries = computed(() => {
     const metaKey = nextPath.join('.');
     const metaEntry = props.meta[metaKey] || {};
     const description = metaEntry.description || '';
+    const title = metaEntry.title || '';
     const baseType = metaEntry.type || typeof originalValue;
 
     if (value !== null && typeof value === 'object') {
       return {
         key: nextPath.join('|'),
         isGroup: true,
-        label: key,
+        label: title || key,
         path: nextPath,
         description,
         value,
@@ -99,7 +100,7 @@ const entries = computed(() => {
     return {
       key: nextPath.join('|'),
       isGroup: false,
-      label: key,
+      label: title || key,
       path: nextPath,
       description,
       value: fieldType === 'boolean' ? Boolean(value) : value ?? '',
