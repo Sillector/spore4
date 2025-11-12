@@ -24,6 +24,7 @@
       <entry key="min" type="number" description="Минимальное значение смещения камеры по оси Z.">10</entry>
       <entry key="max" type="number" description="Максимальное значение смещения камеры по оси Z.">26</entry>
     </entry>
+    <entry key="topDownHeight" type="number" description="Высота камеры при виде сверху.">32</entry>
     <entry key="follow" type="object" description="Настройки следования камеры за кораблём на орбите.">
       <entry key="rate" type="number" description="Скорость догоняющей интерполяции камеры.">5</entry>
       <entry key="min" type="number" description="Минимальный коэффициент сглаживания.">0.05</entry>
@@ -39,6 +40,7 @@
     <entry key="thetaSpeed" type="number" description="Скорость вращения по горизонтальной оси (theta).">0.6</entry>
     <entry key="phiSpeed" type="number" description="Скорость вращения по вертикальной оси (phi).">0.7</entry>
     <entry key="thetaClamp" type="number" description="Максимальный наклон по горизонтальной оси.">0.2</entry>
+    <entry key="autoPhiSpeed" type="number" description="Скорость автоматического вращения корабля вокруг планеты.">0.25</entry>
   </entry>
   <entry key="initialAngles" type="object" description="Стартовые углы камеры при переходе на орбиту.">
     <entry key="theta" type="number" description="Начальный угол theta в градусах.">90</entry>
@@ -51,6 +53,13 @@
     <entry key="material" type="object" description="Материал поверхности планеты.">
       <entry key="roughness" type="number" description="Шероховатость материала поверхности.">1</entry>
       <entry key="metalness" type="number" description="Металличность материала поверхности.">0.05</entry>
+    </entry>
+    <entry key="noise" type="object" description="Параметры фрактального шума для рельефа.">
+      <entry key="scale" type="number" description="Базовый масштаб шума.">1.5</entry>
+      <entry key="amplitude" type="number" description="Максимальная амплитуда смещения вершин.">1.8</entry>
+      <entry key="octaves" type="number" description="Количество октав шума.">4</entry>
+      <entry key="persistence" type="number" description="Затухание амплитуды между октавами.">0.45</entry>
+      <entry key="lacunarity" type="number" description="Усиление частоты между октавами.">2.1</entry>
     </entry>
   </entry>
   <entry key="atmosphere" type="object" description="Настройки визуализации атмосферы планеты.">
