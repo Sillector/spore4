@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { getConfig } from '../config/store.js';
 import { createFollowTarget, createPathTarget, createPointTarget } from './targets.js';
 import { createWorldRandom } from './random.js';
+import { createStarMaterial, randomizeStarMaterialOptions } from './shaders/starMaterial.js';
 
 const systemConfig = getConfig('system');
 const shipConfig = getConfig('ship');
@@ -108,23 +109,35 @@ export class SystemView {
     const group = new THREE.Group();
     const systemSeed = starData?.systemSeed ?? starData?.id ?? 0;
     const randomGenerator = createWorldRandom('system', systemSeed);
+    const starColor = starData?.color?.clone?.() ?? new THREE.Color(0xffffff);
+    const starMaterialConfig = this.config.starCore.material ?? {};
+    const glowStrength =
+      (starMaterialConfig.emissiveMultiplier ?? 1) *
+      (starMaterialConfig.emissiveIntensity ?? 1);
+    const starMaterial = createStarMaterial(
+      randomizeStarMaterialOptions(randomGenerator, {
+        color: starColor,
+        glowStrength,
+        pulseScaleRange: [0.85, 1.6],
+        pulseSpeedRange: [2.8, 4.6],
+        timeScaleRange: [0.6, 1.4],
+        noiseScaleRange: [0.65, 1.4],
+        noiseOffsetRange: 8,
+        causticStrengthRange: [0.9, 1.4],
+        causticSpeedRange: [0.85, 1.7],
+        causticScaleRange: [3.0, 4.6]
+      })
+    );
     const starCore = new THREE.Mesh(
       new THREE.SphereGeometry(
         this.config.starCore.radius,
         this.config.starCore.widthSegments,
         this.config.starCore.heightSegments
       ),
-      new THREE.MeshStandardMaterial({
-        color: starData.color,
-        emissive: starData.color
-          .clone()
-          .multiplyScalar(this.config.starCore.material.emissiveMultiplier),
-        emissiveIntensity: this.config.starCore.material.emissiveIntensity,
-        roughness: this.config.starCore.material.roughness
-      })
+      starMaterial
     );
-    starCore.castShadow = true;
-    starCore.receiveShadow = true;
+    starCore.castShadow = false;
+    starCore.receiveShadow = false;
     group.add(starCore);
 
     const planets = [];
@@ -294,6 +307,11 @@ export class SystemView {
   update(delta, ship, camera) {
     if (!this.wrapper) return;
     this.wrapper.group.rotation.y += delta * this.config.rotationSpeed;
+    if (this.wrapper.star?.material?.uniforms?.time) {
+      const material = this.wrapper.star.material;
+      const timeScale = material.userData?.timeScale ?? 1;
+      material.uniforms.time.value += delta * timeScale;
+    }
     const targetZoom = this.state.zoomProgress.system;
     this.state.zoomSmooth.system = THREE.MathUtils.damp(
       this.state.zoomSmooth.system,

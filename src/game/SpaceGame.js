@@ -4,7 +4,7 @@ import { GalaxyView } from './GalaxyView.js';
 import { SystemView } from './SystemView.js';
 import { OrbitController } from './OrbitController.js';
 import { ShipController } from './ShipController.js';
-import { createBackgroundNebula } from './background.js';
+import { createBackgroundSkybox } from './background.js';
 import { createFollowTarget, createPointTarget } from './targets.js';
 import { getConfig } from '../config/store.js';
 import { MouseInputSystem } from './MouseInputSystem.js';
@@ -64,7 +64,10 @@ export class SpaceGame {
     this.resizeObserver.observe(this.container);
 
     this.setupLights();
-    createBackgroundNebula(this.scene);
+    this.skybox = createBackgroundSkybox(this.scene, this.camera);
+    if (this.skybox) {
+      this.skybox.position.copy(this.camera.position);
+    }
 
     const restored = this.restorePlayerState();
     if (!restored) {
@@ -262,6 +265,9 @@ export class SpaceGame {
     } else if (this.state.level === 'transition') {
       this.camera.lookAt(this.ship.position);
     }
+    if (this.skybox) {
+      this.skybox.position.copy(this.camera.position);
+    }
     this.renderer.render(this.scene, this.camera);
     this.playerStore?.syncFromState(this.state);
     requestAnimationFrame(this.animate);
@@ -299,6 +305,16 @@ export class SpaceGame {
     if (this.playerStore) {
       this.playerStore.dispose();
       this.playerStore = null;
+    }
+    if (this.skybox) {
+      this.scene.remove(this.skybox);
+      if (this.skybox.material?.map) {
+        this.skybox.material.map.dispose();
+      }
+      this.skybox.material?.dispose?.();
+      this.skybox.geometry?.dispose?.();
+      this.skybox = null;
+      this.scene.environment = null;
     }
   }
 }
