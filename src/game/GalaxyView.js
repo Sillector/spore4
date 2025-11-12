@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { getConfig } from '../config/store.js';
 import { createFollowTarget } from './targets.js';
 import { createSeedKey, createWorldRandom } from './random.js';
+import { createStarMaterial } from './shaders/starMaterial.js';
 
 const STAR_COLOR_PRESETS = [
   { hue: 0.02, saturation: 0.78, lightness: 0.56, emissiveMultiplier: 0.8 },
@@ -33,6 +34,7 @@ export class GalaxyView {
     this.group.name = 'Galaxy';
     this.scene.add(this.group);
     this.starPalette = this.createPalette();
+    this.starMaterials = [];
     this.hoverSettings = this.createHoverSettings();
     this.populateStars();
     this.hoverState = this.createHoverState();
@@ -41,6 +43,7 @@ export class GalaxyView {
   populateStars() {
     const temp = new THREE.Vector3();
     this.state.galaxyStars.length = 0;
+    this.starMaterials.length = 0;
     for (let i = 0; i < this.config.starCount; i += 1) {
       const starKey = createSeedKey('star', i);
       const starRandom = createWorldRandom('galaxy', starKey);
@@ -97,18 +100,16 @@ export class GalaxyView {
       this.config.star.geometry.widthSegments,
       this.config.star.geometry.heightSegments
     );
-    const material = new THREE.MeshStandardMaterial({
+    const material = createStarMaterial({
       color,
-      emissive: color
-        .clone()
-        .multiplyScalar(emissiveMultiplier),
-      emissiveIntensity: this.config.star.material.emissiveIntensity,
-      roughness: this.config.star.material.roughness,
-      metalness: this.config.star.material.metalness
+      glowStrength: emissiveMultiplier,
+      timeOffset: randomGenerator.float(0, Math.PI * 2),
+      pulseScale: THREE.MathUtils.lerp(0.7, 1.4, randomGenerator.next()),
+      noiseScale: THREE.MathUtils.lerp(0.6, 1.3, randomGenerator.next())
     });
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
     const nameMin = this.config.star.name.min;
     const nameMax = nameMin + this.config.star.name.maxRange - 1;
     mesh.userData = {
@@ -117,6 +118,7 @@ export class GalaxyView {
       mesh
     };
     mesh.userData.mesh = mesh;
+    this.starMaterials.push(material);
     return mesh;
   }
 
@@ -215,6 +217,7 @@ export class GalaxyView {
     const closeTilt = THREE.MathUtils.degToRad(this.config.groupTilt.near);
     this.group.rotation.x = THREE.MathUtils.lerp(topTilt, closeTilt, zoomNormalized);
     this.updateHoverVisuals(ship);
+    this.updateStarMaterials(delta);
   }
 
   setVisible(value) {
@@ -228,10 +231,13 @@ export class GalaxyView {
     if (this.hoverState.star === starData) {
       return;
     }
+    this.applyStarHighlight(this.hoverState.star, false);
     this.hoverState.star = starData;
     if (!starData) {
       this.clearHover();
+      return;
     }
+    this.applyStarHighlight(starData, true);
   }
 
   updateHoverVisuals(ship) {
@@ -262,7 +268,10 @@ export class GalaxyView {
   }
 
   clearHover() {
-    const { line, label } = this.hoverState;
+    const { star, line, label } = this.hoverState;
+    if (star) {
+      this.applyStarHighlight(star, false);
+    }
     this.hoverState.star = null;
     line.visible = false;
     label.visible = false;
@@ -373,5 +382,35 @@ export class GalaxyView {
       lineOpacity: hover.lineOpacity ?? 0.65,
       labelOffset: hover.labelOffset ?? 6
     };
+  }
+
+  applyStarHighlight(starData, isActive) {
+    if (!starData?.mesh) {
+      return;
+    }
+    const material = starData.mesh.material;
+    if (!material?.userData) {
+      return;
+    }
+    material.userData.targetHighlight = isActive ? 1 : 0;
+  }
+
+  updateStarMaterials(delta) {
+    const damping = this.config?.star?.highlightDamping ?? 6;
+    for (const material of this.starMaterials) {
+      if (!material?.uniforms?.time) {
+        continue;
+      }
+      material.uniforms.time.value += delta;
+      const data = material.userData;
+      if (!data) {
+        continue;
+      }
+      const current = data.currentHighlight ?? 0;
+      const target = data.targetHighlight ?? 0;
+      const nextValue = THREE.MathUtils.damp(current, target, damping, delta);
+      data.currentHighlight = nextValue;
+      material.uniforms.highlight.value = nextValue;
+    }
   }
 }
