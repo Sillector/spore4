@@ -1,15 +1,12 @@
 <config name="background" title="Фоновая сцена">
-  <entry key="starCount" type="number" title="Количество звёзд" description="Количество фоновых звёзд, используемых для заполнения сцены.">2000</entry>
-  <entry key="radius" type="number" title="Радиус распределения" description="Радиус сферы, в пределах которой распределяются фоновые звёзды.">600</entry>
-  <entry key="color" type="object" title="Цвет звёзд" description="Настройки оттенка и яркости фоновых звёзд.">
-    <entry key="hueBase" type="number" title="Базовый оттенок" description="Базовый оттенок фоновых звёзд.">0.55</entry>
-    <entry key="hueVariance" type="number" title="Разброс оттенка" description="Максимальное отклонение оттенка для фоновых звёзд.">0.08</entry>
-    <entry key="saturation" type="number" title="Насыщенность" description="Насыщенность цвета фоновых звёзд.">0.55</entry>
-    <entry key="lightnessBase" type="number" title="Базовая яркость" description="Базовая яркость фоновых звёзд.">0.26</entry>
-    <entry key="lightnessVariance" type="number" title="Разброс яркости" description="Диапазон вариации яркости фоновых звёзд.">0.12</entry>
-  </entry>
-  <entry key="material" type="object" title="Материал" description="Параметры материала для частиц фоновых звёзд.">
-    <entry key="size" type="number" title="Размер точки" description="Размер точек, используемых для отображения звёзд.">0.9</entry>
-    <entry key="opacity" type="number" title="Прозрачность" description="Прозрачность фоновых звёзд.">0.38</entry>
+  <entry key="starCount" type="number" title="Количество звёзд" description="Количество фоновых точек, распределяемых по скайбоксу.">1200</entry>
+  <entry key="skybox" type="object" title="Скайбокс" description="Настройки процедурного скайбокса.">
+    <entry key="size" type="number" title="Размер текстуры" description="Размер стороны текстуры скайбокса в пикселях.">1024</entry>
+    <entry key="topColor" type="string" title="Цвет зенита" description="Цвет верхней части неба.">#0b1029</entry>
+    <entry key="bottomColor" type="string" title="Цвет горизонта" description="Цвет нижней части неба.">#03040f</entry>
+    <entry key="horizonColor" type="string" title="Переходный цвет" description="Переходный цвет между верхом и низом.">#16204a</entry>
+    <entry key="glowColor" type="string" title="Цвет свечения" description="Цвет центрального свечения туманности.">#2840a9</entry>
+    <entry key="starColor" type="string" title="Цвет звёзд" description="Цвет процедурных звёзд.">#d4e7ff</entry>
+    <entry key="starTwinkle" type="number" title="Мерцание" description="Интенсивность мерцания звёзд.">0.55</entry>
   </entry>
 </config>

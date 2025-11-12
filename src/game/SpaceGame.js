@@ -4,7 +4,7 @@ import { GalaxyView } from './GalaxyView.js';
 import { SystemView } from './SystemView.js';
 import { OrbitController } from './OrbitController.js';
 import { ShipController } from './ShipController.js';
-import { createBackgroundNebula } from './background.js';
+import { createBackgroundSkybox } from './background.js';
 import { createFollowTarget, createPointTarget } from './targets.js';
 import { getConfig } from '../config/store.js';
 import { MouseInputSystem } from './MouseInputSystem.js';
@@ -64,7 +64,7 @@ export class SpaceGame {
     this.resizeObserver.observe(this.container);
 
     this.setupLights();
-    createBackgroundNebula(this.scene);
+    createBackgroundSkybox(this.scene);
 
     const restored = this.restorePlayerState();
     if (!restored) {
