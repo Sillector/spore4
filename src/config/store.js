@@ -4,6 +4,7 @@ import shipSource from './ship.xml?raw';
 import orbitSource from './orbit.xml?raw';
 import backgroundSource from './background.xml?raw';
 import sceneSource from './scene.xml?raw';
+import worldSource from './world.xml?raw';
 import { cloneMeta, parseConfigXml } from './xml.js';
 
 const clone = (value) => (
@@ -18,7 +19,8 @@ const sources = {
   ship: parseConfigXml(shipSource),
   orbit: parseConfigXml(orbitSource),
   background: parseConfigXml(backgroundSource),
-  scene: parseConfigXml(sceneSource)
+  scene: parseConfigXml(sceneSource),
+  world: parseConfigXml(worldSource)
 };
 
 const store = new Map();

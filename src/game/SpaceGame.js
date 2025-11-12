@@ -8,10 +8,12 @@ import { createBackgroundNebula } from './background.js';
 import { createFollowTarget, createPointTarget } from './targets.js';
 import { getConfig } from '../config/store.js';
 import { MouseInputSystem } from './MouseInputSystem.js';
+import { PlayerStore } from './playerStore.js';
 
 const sceneConfig = getConfig('scene');
 const galaxyConfig = getConfig('galaxy');
 const shipConfig = getConfig('ship');
+const upDirection = new THREE.Vector3(0, 1, 0);
 
 export class SpaceGame {
   constructor(container) {
@@ -40,6 +42,7 @@ export class SpaceGame {
     );
 
     this.state = new GameState();
+    this.playerStore = new PlayerStore();
     this.pointer = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
     this.clock = new THREE.Clock();
@@ -67,6 +70,7 @@ export class SpaceGame {
     this.mouseInput = null;
     this.bindEvents();
     this.animate = this.animate.bind(this);
+    this.playerStore.syncFromState(this.state);
     this.animate();
   }
 
@@ -145,7 +149,8 @@ export class SpaceGame {
     const target = this.state.currentStar
       ? createFollowTarget(
           this.state.currentStar.mesh,
-          galaxyConfig.ship.approachAltitude
+          galaxyConfig.ship.approachAltitude,
+          upDirection
         )
       : createPointTarget(new THREE.Vector3());
     this.ship.setTarget(target);
@@ -203,6 +208,7 @@ export class SpaceGame {
       this.camera.lookAt(this.ship.position);
     }
     this.renderer.render(this.scene, this.camera);
+    this.playerStore?.syncFromState(this.state);
     requestAnimationFrame(this.animate);
   }
 
@@ -234,6 +240,10 @@ export class SpaceGame {
     }
     if (this.boundKeyUp) {
       window.removeEventListener('keyup', this.boundKeyUp);
+    }
+    if (this.playerStore) {
+      this.playerStore.dispose();
+      this.playerStore = null;
     }
   }
 }

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { getConfig } from '../config/store.js';
 import { createFollowTarget, createPathTarget, createPointTarget } from './targets.js';
+import { createWorldRandom } from './random.js';
 
 const systemConfig = getConfig('system');
 const shipConfig = getConfig('ship');
@@ -37,14 +38,7 @@ export class SystemView {
     this.state.currentPlanet = planetData;
     planetData.mesh.getWorldPosition(planetWorldPosition);
     shipWorldPosition.copy(ship.position);
-    approachDirection.copy(shipWorldPosition).sub(planetWorldPosition);
-    if (approachDirection.lengthSq() < 1e-6) {
-      approachDirection.copy(planetWorldPosition);
-      if (approachDirection.lengthSq() < 1e-6) {
-        approachDirection.set(0, 0, 1);
-      }
-    }
-    approachDirection.normalize();
+    approachDirection.set(0, 1, 0);
     const altitude = planetData.radius + this.config.ship.approachOffset;
     approachPoint
       .copy(planetWorldPosition)
@@ -112,6 +106,8 @@ export class SystemView {
 
   buildSystem(starData) {
     const group = new THREE.Group();
+    const systemSeed = starData?.systemSeed ?? starData?.id ?? 0;
+    const randomGenerator = createWorldRandom('system', systemSeed);
     const starCore = new THREE.Mesh(
       new THREE.SphereGeometry(
         this.config.starCore.radius,
@@ -133,12 +129,13 @@ export class SystemView {
 
     const planets = [];
     let orbitRadius = this.config.planet.orbit.startRadius;
+    const hueBase = randomGenerator.next();
     for (let i = 0; i < this.config.planetsPerSystem; i += 1) {
-      const radius = THREE.MathUtils.randFloat(
+      const radius = randomGenerator.float(
         this.config.planet.radiusRange.min,
         this.config.planet.radiusRange.max
       );
-      const hue = (starData.systemSeed + i * this.config.planet.color.hueStep) % 1;
+      const hue = (hueBase + i * this.config.planet.color.hueStep) % 1;
       const color = new THREE.Color().setHSL(
         hue,
         this.config.planet.color.saturation,
@@ -155,10 +152,13 @@ export class SystemView {
         metalness: this.config.planet.material.metalness
       });
       const planet = new THREE.Mesh(planetGeometry, planetMaterial);
-      const orbitAngle = Math.random() * Math.PI * 2;
+      const orbitAngle = randomGenerator.float(0, Math.PI * 2);
       planet.position.set(
         Math.cos(orbitAngle) * orbitRadius,
-        THREE.MathUtils.randFloat(-this.config.planet.heightRange, this.config.planet.heightRange),
+        randomGenerator.float(
+          -this.config.planet.heightRange,
+          this.config.planet.heightRange
+        ),
         Math.sin(orbitAngle) * orbitRadius
       );
       planet.castShadow = true;
@@ -177,7 +177,7 @@ export class SystemView {
       }
       group.add(planet);
       planets.push({ ...planet.userData, mesh: planet });
-      orbitRadius += THREE.MathUtils.randFloat(
+      orbitRadius += randomGenerator.float(
         this.config.planet.orbit.incrementRange.min,
         this.config.planet.orbit.incrementRange.max
       );
@@ -186,7 +186,8 @@ export class SystemView {
     const asteroidBelt = this.createAsteroidBelt(
       this.config.asteroidBelt.innerRadius,
       this.config.asteroidBelt.outerRadius,
-      this.config.asteroidBelt.count
+      this.config.asteroidBelt.count,
+      randomGenerator
     );
     group.add(asteroidBelt);
 
@@ -195,7 +196,7 @@ export class SystemView {
     return this.wrapper;
   }
 
-  createAsteroidBelt(inner, outer, count) {
+  createAsteroidBelt(inner, outer, count, randomGenerator) {
     const geometry = new THREE.IcosahedronGeometry(
       this.config.asteroidBelt.geometryRadius,
       this.config.asteroidBelt.geometryDetail
@@ -208,17 +209,17 @@ export class SystemView {
     const belt = new THREE.InstancedMesh(geometry, material, count);
     const dummy = new THREE.Object3D();
     for (let i = 0; i < count; i += 1) {
-      const radius = THREE.MathUtils.randFloat(inner, outer);
-      const angle = Math.random() * Math.PI * 2;
-      const height = THREE.MathUtils.randFloatSpread(this.config.asteroidBelt.heightSpread);
+      const radius = randomGenerator.float(inner, outer);
+      const angle = randomGenerator.float(0, Math.PI * 2);
+      const height = randomGenerator.floatSpread(this.config.asteroidBelt.heightSpread);
       dummy.position.set(Math.cos(angle) * radius, height, Math.sin(angle) * radius);
       dummy.rotation.set(
-        Math.random() * Math.PI,
-        Math.random() * Math.PI,
-        Math.random() * Math.PI
+        randomGenerator.float(0, Math.PI),
+        randomGenerator.float(0, Math.PI),
+        randomGenerator.float(0, Math.PI)
       );
       dummy.scale.setScalar(
-        THREE.MathUtils.randFloat(
+        randomGenerator.float(
           this.config.asteroidBelt.scaleRange.min,
           this.config.asteroidBelt.scaleRange.max
         )
