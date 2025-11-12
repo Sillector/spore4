@@ -8,6 +8,17 @@ const shipConfig = getConfig('ship');
 const cameraOffset = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
 
+function createSeededRandom(seed) {
+  let value = Math.floor(Math.abs(seed % 2147483647));
+  if (value === 0) {
+    value = 2147483647;
+  }
+  return () => {
+    value = (value * 16807) % 2147483647;
+    return (value - 1) / 2147483646;
+  };
+}
+
 export class SystemView {
   constructor(scene, state) {
     this.scene = scene;
@@ -76,11 +87,13 @@ export class SystemView {
     group.add(starCore);
 
     const planets = [];
+    const random = createSeededRandom(starData.systemSeed);
     let orbitRadius = this.config.planet.orbit.startRadius;
     for (let i = 0; i < this.config.planetsPerSystem; i += 1) {
-      const radius = THREE.MathUtils.randFloat(
+      const radius = THREE.MathUtils.lerp(
         this.config.planet.radiusRange.min,
-        this.config.planet.radiusRange.max
+        this.config.planet.radiusRange.max,
+        random()
       );
       const hue = (starData.systemSeed + i * this.config.planet.color.hueStep) % 1;
       const color = new THREE.Color().setHSL(
@@ -99,10 +112,14 @@ export class SystemView {
         metalness: this.config.planet.material.metalness
       });
       const planet = new THREE.Mesh(planetGeometry, planetMaterial);
-      const orbitAngle = Math.random() * Math.PI * 2;
+      const orbitAngle = random() * Math.PI * 2;
       planet.position.set(
         Math.cos(orbitAngle) * orbitRadius,
-        THREE.MathUtils.randFloat(-this.config.planet.heightRange, this.config.planet.heightRange),
+        THREE.MathUtils.lerp(
+          -this.config.planet.heightRange,
+          this.config.planet.heightRange,
+          random()
+        ),
         Math.sin(orbitAngle) * orbitRadius
       );
       planet.castShadow = true;
@@ -110,13 +127,16 @@ export class SystemView {
       planet.userData = {
         name: `${this.config.planet.naming.prefix}${i + 1}`,
         radius,
-        mesh: planet
+        mesh: planet,
+        terraformIndex: random() > 0.5 ? 2 : 1,
+        terrainSeed: starData.systemSeed * 100 + i * 37 + 17
       };
       group.add(planet);
       planets.push({ ...planet.userData, mesh: planet });
-      orbitRadius += THREE.MathUtils.randFloat(
+      orbitRadius += THREE.MathUtils.lerp(
         this.config.planet.orbit.incrementRange.min,
-        this.config.planet.orbit.incrementRange.max
+        this.config.planet.orbit.incrementRange.max,
+        random()
       );
     }
 
