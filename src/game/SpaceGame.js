@@ -7,6 +7,7 @@ import { ShipController } from './ShipController.js';
 import { createBackgroundNebula } from './background.js';
 import { createFollowTarget, createPointTarget } from './targets.js';
 import { getConfig } from '../config/store.js';
+import { MouseInputSystem } from './MouseInputSystem.js';
 
 const sceneConfig = getConfig('scene');
 const galaxyConfig = getConfig('galaxy');
@@ -63,6 +64,7 @@ export class SpaceGame {
     createBackgroundNebula(this.scene);
 
     this.initializeStartingStar();
+    this.mouseInput = null;
     this.bindEvents();
     this.animate = this.animate.bind(this);
     this.animate();
@@ -98,83 +100,11 @@ export class SpaceGame {
   }
 
   bindEvents() {
-    this.boundPointerMove = this.onPointerMove.bind(this);
-    this.boundPointerDown = this.onPointerDown.bind(this);
-    this.boundPointerLeave = this.onPointerLeave.bind(this);
-    this.boundWheel = this.onWheel.bind(this);
+    this.mouseInput = new MouseInputSystem(this);
     this.boundKeyDown = (event) => this.onKeyChange(event);
     this.boundKeyUp = (event) => this.onKeyChange(event);
-
-    this.renderer.domElement.addEventListener('pointermove', this.boundPointerMove);
-    this.renderer.domElement.addEventListener('pointerdown', this.boundPointerDown);
-    this.renderer.domElement.addEventListener('pointerleave', this.boundPointerLeave);
-    window.addEventListener('wheel', this.boundWheel, { passive: false });
     window.addEventListener('keydown', this.boundKeyDown);
     window.addEventListener('keyup', this.boundKeyUp);
-  }
-
-  onPointerMove(event) {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-      const localX = event.clientX - rect.left;
-      const localY = event.clientY - rect.top;
-      this.pointer.x = (localX / rect.width) * 2 - 1;
-      this.pointer.y = -(localY / rect.height) * 2 + 1;
-      if (this.state.level === 'system') {
-          this.updateSystemHover();
-      } else {
-          this.systemView.setHoveredPlanet(null);
-      }
-      this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      this.updateHoverSelection();
-  }
-
-  onPointerDown(event) {
-    event.preventDefault();
-    const intersects = this.pickIntersectables();
-    if (!intersects.length) return;
-    const first = intersects[0].object;
-    if (this.state.level === 'galaxy') {
-      this.galaxyView.moveShipToStar(this.ship, first.userData);
-    } else if (this.state.level === 'system') {
-      this.systemView.moveShipToPlanet(this.ship, first.userData);
-    }
-  }
-
-  onPointerLeave() {
-    this.systemView.setHoveredPlanet(null);
-      this.pointer.set(0, 0);
-      this.hoveredStar = null;
-      this.galaxyView.setHoveredStar(null);
-  }
-
-
-  onWheel(event) {
-    event.preventDefault();
-    const direction = -Math.sign(event.deltaY);
-    if (direction === 0) return;
-    if (this.state.level === 'galaxy') {
-      const shouldEnterSystem = this.galaxyView.handleZoom(direction);
-      if (shouldEnterSystem) {
-        this.enterSystem(this.state.currentStar);
-      }
-    } else if (this.state.level === 'system') {
-      const action = this.systemView.handleZoom(direction);
-      if (action === 'enterOrbit') {
-        this.enterOrbit(this.state.currentPlanet);
-      } else if (action === 'returnToGalaxy') {
-        this.returnToGalaxy();
-      }
-    } else if (this.state.level === 'orbit') {
-      const magnitude = Math.min(
-        Math.abs(event.deltaY) / sceneConfig.input.orbitWheelScale,
-        1
-      );
-      const shouldExitOrbit = this.orbitController.handleZoom(direction, magnitude);
-      if (shouldExitOrbit) {
-        this.exitOrbit();
-      }
-    }
   }
 
   onKeyChange(event) {
@@ -296,17 +226,8 @@ export class SpaceGame {
     this.renderer.dispose();
     this.renderer.domElement.remove();
     this.ship.dispose();
-    if (this.boundPointerMove) {
-      this.renderer.domElement.removeEventListener('pointermove', this.boundPointerMove);
-    }
-    if (this.boundPointerDown) {
-      this.renderer.domElement.removeEventListener('pointerdown', this.boundPointerDown);
-    }
-    if (this.boundPointerLeave) {
-      this.renderer.domElement.removeEventListener('pointerleave', this.boundPointerLeave);
-    }
-    if (this.boundWheel) {
-      window.removeEventListener('wheel', this.boundWheel);
+    if (this.mouseInput) {
+      this.mouseInput.dispose();
     }
     if (this.boundKeyDown) {
       window.removeEventListener('keydown', this.boundKeyDown);

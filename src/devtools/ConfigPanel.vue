@@ -27,7 +27,7 @@
               >
                 ▾
               </button>
-              <h3>{{ section.name }}</h3>
+              <h3>{{ section.title }}</h3>
             </div>
             <button class="dev-panel__save" type="button" @click.stop="saveSection(section)">
               Сохранить
@@ -57,6 +57,7 @@ import {
   getConfigMetaSnapshot,
   getConfigNames,
   getConfigSnapshot,
+  getConfigTitle,
   updateConfig
 } from '../config/store.js';
 
@@ -68,6 +69,7 @@ function createSection(name) {
   const original = getConfigSnapshot(name);
   return reactive({
     name,
+    title: getConfigTitle(name),
     original,
     draft: reactive(createDraft(original)),
     meta: getConfigMetaSnapshot(name),

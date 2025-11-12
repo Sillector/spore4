@@ -46,8 +46,8 @@ function createConfigWriter() {
           try {
             const data = JSON.parse(body || '{}');
             const xmlSource = await fs.readFile(filePath, 'utf8');
-            const { meta } = parseConfigXml(xmlSource);
-            const serialized = serializeConfigXml(name, data, meta);
+            const { meta, title } = parseConfigXml(xmlSource);
+            const serialized = serializeConfigXml(name, data, meta, title);
             await fs.writeFile(filePath, serialized, 'utf8');
             server.ws.send({ type: 'full-reload' });
             res.statusCode = 200;

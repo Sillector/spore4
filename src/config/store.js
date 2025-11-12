@@ -23,10 +23,12 @@ const sources = {
 
 const store = new Map();
 const metaStore = new Map();
+const titleStore = new Map();
 
-for (const [name, { data, meta }] of Object.entries(sources)) {
+for (const [name, { data, meta, title }] of Object.entries(sources)) {
   store.set(name, clone(data));
   metaStore.set(name, cloneMeta(meta));
+  titleStore.set(name, title || name);
 }
 
 function mergeDeep(target, source) {
@@ -65,6 +67,10 @@ export function getConfigMeta(name) {
     throw new Error(`Unknown config meta: ${name}`);
   }
   return meta;
+}
+
+export function getConfigTitle(name) {
+  return titleStore.get(name) || name;
 }
 
 export function getConfigNames() {

@@ -1,93 +1,93 @@
-<config name="system">
-  <entry key="planetsPerSystem" type="number" description="Количество планет, генерируемых в одной системе.">6</entry>
-  <entry key="rotationSpeed" type="number" description="Скорость вращения планетарной системы.">0.05</entry>
-  <entry key="zoom" type="object" description="Настройки масштабирования камеры в системе.">
-    <entry key="step" type="number" description="Шаг изменения масштаба камеры.">0.25</entry>
-    <entry key="damping" type="number" description="Сила сглаживания переходов масштаба.">6</entry>
+<config name="system" title="Планетные системы">
+  <entry key="planetsPerSystem" type="number" title="Планет в системе" description="Количество планет, генерируемых в одной системе.">6</entry>
+  <entry key="rotationSpeed" type="number" title="Скорость вращения" description="Скорость вращения планетарной системы.">0.05</entry>
+  <entry key="zoom" type="object" title="Масштабирование" description="Настройки масштабирования камеры в системе.">
+    <entry key="step" type="number" title="Шаг масштабирования" description="Шаг изменения масштаба камеры.">0.25</entry>
+    <entry key="damping" type="number" title="Сглаживание" description="Сила сглаживания переходов масштаба.">6</entry>
   </entry>
-  <entry key="ship" type="object" description="Параметры движения корабля в системе.">
-    <entry key="approachOffset" type="number" description="Смещение корабля при приближении к планете.">3</entry>
-    <entry key="entryTargetZ" type="number" description="Глубинная позиция цели для входа в систему.">25</entry>
-    <entry key="entryShipPosition" type="object" description="Позиция корабля при входе в систему.">
-      <entry key="x" type="number" description="Координата корабля по оси X при входе.">0</entry>
-      <entry key="y" type="number" description="Координата корабля по оси Y при входе.">0</entry>
-      <entry key="z" type="number" description="Координата корабля по оси Z при входе.">35</entry>
-    </entry>
-  </entry>
-  <entry key="camera" type="object" description="Настройки камеры в системном режиме.">
-    <entry key="entryPosition" type="object" description="Начальная позиция камеры при входе в систему.">
-      <entry key="x" type="number" description="Координата камеры по оси X при входе.">0</entry>
-      <entry key="y" type="number" description="Координата камеры по оси Y при входе.">28</entry>
-      <entry key="z" type="number" description="Координата камеры по оси Z при входе.">82</entry>
-    </entry>
-    <entry key="baseOffset" type="object" description="Базовое смещение камеры при стандартном обзоре.">
-      <entry key="y" type="number" description="Смещение камеры по оси Y в базовом состоянии.">18</entry>
-      <entry key="z" type="number" description="Смещение камеры по оси Z в базовом состоянии.">48</entry>
-    </entry>
-    <entry key="zoomInOffset" type="object" description="Смещение камеры при приближении.">
-      <entry key="y" type="number" description="Вертикальное смещение камеры при приближении.">12</entry>
-      <entry key="z" type="number" description="Глубинное смещение камеры при приближении.">32</entry>
-    </entry>
-    <entry key="zoomOutOffset" type="object" description="Смещение камеры при отдалении.">
-      <entry key="y" type="number" description="Вертикальное смещение камеры при отдалении.">26</entry>
-      <entry key="z" type="number" description="Глубинное смещение камеры при отдалении.">72</entry>
-    </entry>
-    <entry key="follow" type="object" description="Настройки следования камеры за кораблём.">
-      <entry key="rate" type="number" description="Скорость интерполяции камеры к целевой точке.">4.5</entry>
-      <entry key="min" type="number" description="Минимальный коэффициент сглаживания движения камеры.">0.05</entry>
-      <entry key="max" type="number" description="Максимальный коэффициент сглаживания движения камеры.">0.16</entry>
+  <entry key="ship" type="object" title="Корабль" description="Параметры движения корабля в системе.">
+    <entry key="approachOffset" type="number" title="Смещение подхода" description="Смещение корабля при приближении к планете.">3</entry>
+    <entry key="entryTargetZ" type="number" title="Глубина входа" description="Глубинная позиция цели для входа в систему.">25</entry>
+    <entry key="entryShipPosition" type="object" title="Позиция корабля" description="Позиция корабля при входе в систему.">
+      <entry key="x" type="number" title="Координата X" description="Координата корабля по оси X при входе.">0</entry>
+      <entry key="y" type="number" title="Координата Y" description="Координата корабля по оси Y при входе.">0</entry>
+      <entry key="z" type="number" title="Координата Z" description="Координата корабля по оси Z при входе.">35</entry>
     </entry>
   </entry>
-  <entry key="starCore" type="object" description="Визуальные параметры центральной звезды.">
-    <entry key="radius" type="number" description="Радиус центральной звезды.">4</entry>
-    <entry key="widthSegments" type="number" description="Количество сегментов по ширине для звезды.">32</entry>
-    <entry key="heightSegments" type="number" description="Количество сегментов по высоте для звезды.">32</entry>
-    <entry key="material" type="object" description="Настройки материала звезды.">
-      <entry key="emissiveMultiplier" type="number" description="Множитель яркости эмиссионного свечения.">1.6</entry>
-      <entry key="emissiveIntensity" type="number" description="Интенсивность эмиссионного свечения материала.">2.5</entry>
-      <entry key="roughness" type="number" description="Шероховатость материала звезды.">0.1</entry>
+  <entry key="camera" type="object" title="Камера" description="Настройки камеры в системном режиме.">
+    <entry key="entryPosition" type="object" title="Позиция входа" description="Начальная позиция камеры при входе в систему.">
+      <entry key="x" type="number" title="Координата X" description="Координата камеры по оси X при входе.">0</entry>
+      <entry key="y" type="number" title="Координата Y" description="Координата камеры по оси Y при входе.">28</entry>
+      <entry key="z" type="number" title="Координата Z" description="Координата камеры по оси Z при входе.">82</entry>
+    </entry>
+    <entry key="baseOffset" type="object" title="Базовое смещение" description="Базовое смещение камеры при стандартном обзоре.">
+      <entry key="y" type="number" title="Смещение Y" description="Смещение камеры по оси Y в базовом состоянии.">18</entry>
+      <entry key="z" type="number" title="Смещение Z" description="Смещение камеры по оси Z в базовом состоянии.">48</entry>
+    </entry>
+    <entry key="zoomInOffset" type="object" title="Смещение при приближении" description="Смещение камеры при приближении.">
+      <entry key="y" type="number" title="Смещение Y" description="Вертикальное смещение камеры при приближении.">12</entry>
+      <entry key="z" type="number" title="Смещение Z" description="Глубинное смещение камеры при приближении.">32</entry>
+    </entry>
+    <entry key="zoomOutOffset" type="object" title="Смещение при отдалении" description="Смещение камеры при отдалении.">
+      <entry key="y" type="number" title="Смещение Y" description="Вертикальное смещение камеры при отдалении.">26</entry>
+      <entry key="z" type="number" title="Смещение Z" description="Глубинное смещение камеры при отдалении.">72</entry>
+    </entry>
+    <entry key="follow" type="object" title="Следование" description="Настройки следования камеры за кораблём.">
+      <entry key="rate" type="number" title="Скорость следования" description="Скорость интерполяции камеры к целевой точке.">4.5</entry>
+      <entry key="min" type="number" title="Минимальное сглаживание" description="Минимальный коэффициент сглаживания движения камеры.">0.05</entry>
+      <entry key="max" type="number" title="Максимальное сглаживание" description="Максимальный коэффициент сглаживания движения камеры.">0.16</entry>
     </entry>
   </entry>
-  <entry key="planet" type="object" description="Параметры генерации планет.">
-    <entry key="radiusRange" type="object" description="Диапазон радиусов планет.">
-      <entry key="min" type="number" description="Минимальный радиус планеты.">1.5</entry>
-      <entry key="max" type="number" description="Максимальный радиус планеты.">3.8</entry>
+  <entry key="starCore" type="object" title="Центральная звезда" description="Визуальные параметры центральной звезды.">
+    <entry key="radius" type="number" title="Радиус" description="Радиус центральной звезды.">4</entry>
+    <entry key="widthSegments" type="number" title="Сегменты по ширине" description="Количество сегментов по ширине для звезды.">32</entry>
+    <entry key="heightSegments" type="number" title="Сегменты по высоте" description="Количество сегментов по высоте для звезды.">32</entry>
+    <entry key="material" type="object" title="Материал" description="Настройки материала звезды.">
+      <entry key="emissiveMultiplier" type="number" title="Множитель свечения" description="Множитель яркости эмиссионного свечения.">1.6</entry>
+      <entry key="emissiveIntensity" type="number" title="Интенсивность свечения" description="Интенсивность эмиссионного свечения материала.">2.5</entry>
+      <entry key="roughness" type="number" title="Шероховатость" description="Шероховатость материала звезды.">0.1</entry>
     </entry>
-    <entry key="geometrySegments" type="number" description="Количество сегментов геометрии планеты.">32</entry>
-    <entry key="color" type="object" description="Параметры цветовой палитры планет.">
-      <entry key="hueStep" type="number" description="Шаг изменения оттенка между планетами.">0.13</entry>
-      <entry key="saturation" type="number" description="Насыщенность цвета планет.">0.6</entry>
-      <entry key="lightness" type="number" description="Яркость цвета планет.">0.5</entry>
+  </entry>
+  <entry key="planet" type="object" title="Планеты" description="Параметры генерации планет.">
+    <entry key="radiusRange" type="object" title="Диапазон радиусов" description="Диапазон радиусов планет.">
+      <entry key="min" type="number" title="Минимум" description="Минимальный радиус планеты.">1.5</entry>
+      <entry key="max" type="number" title="Максимум" description="Максимальный радиус планеты.">3.8</entry>
     </entry>
-    <entry key="material" type="object" description="Материал поверхности планет.">
-      <entry key="roughness" type="number" description="Шероховатость материала планеты.">0.7</entry>
-      <entry key="metalness" type="number" description="Металличность материала планеты.">0.1</entry>
+    <entry key="geometrySegments" type="number" title="Сегменты геометрии" description="Количество сегментов геометрии планеты.">32</entry>
+    <entry key="color" type="object" title="Цвет" description="Параметры цветовой палитры планет.">
+      <entry key="hueStep" type="number" title="Шаг оттенка" description="Шаг изменения оттенка между планетами.">0.13</entry>
+      <entry key="saturation" type="number" title="Насыщенность" description="Насыщенность цвета планет.">0.6</entry>
+      <entry key="lightness" type="number" title="Яркость" description="Яркость цвета планет.">0.5</entry>
     </entry>
-    <entry key="heightRange" type="number" description="Амплитуда высотного шума поверхности планет.">1.5</entry>
-    <entry key="orbit" type="object" description="Параметры орбит планет в системе.">
-      <entry key="startRadius" type="number" description="Начальный радиус первой орбиты.">12</entry>
-      <entry key="incrementRange" type="object" description="Диапазон увеличения радиуса орбиты между планетами.">
-        <entry key="min" type="number" description="Минимальное увеличение радиуса орбиты.">6</entry>
-        <entry key="max" type="number" description="Максимальное увеличение радиуса орбиты.">11</entry>
+    <entry key="material" type="object" title="Материал" description="Материал поверхности планет.">
+      <entry key="roughness" type="number" title="Шероховатость" description="Шероховатость материала планеты.">0.7</entry>
+      <entry key="metalness" type="number" title="Металличность" description="Металличность материала планеты.">0.1</entry>
+    </entry>
+    <entry key="heightRange" type="number" title="Рельеф" description="Амплитуда высотного шума поверхности планет.">1.5</entry>
+    <entry key="orbit" type="object" title="Орбиты" description="Параметры орбит планет в системе.">
+      <entry key="startRadius" type="number" title="Начальный радиус" description="Начальный радиус первой орбиты.">12</entry>
+      <entry key="incrementRange" type="object" title="Диапазон приращения" description="Диапазон увеличения радиуса орбиты между планетами.">
+        <entry key="min" type="number" title="Минимум" description="Минимальное увеличение радиуса орбиты.">6</entry>
+        <entry key="max" type="number" title="Максимум" description="Максимальное увеличение радиуса орбиты.">11</entry>
       </entry>
     </entry>
-    <entry key="naming" type="object" description="Настройки генерации названий планет.">
-      <entry key="prefix" type="string" description="Префикс для названия планеты.">Планета </entry>
+    <entry key="naming" type="object" title="Названия" description="Настройки генерации названий планет.">
+      <entry key="prefix" type="string" title="Префикс" description="Префикс для названия планеты.">Планета </entry>
     </entry>
   </entry>
-  <entry key="asteroidBelt" type="object" description="Параметры генерации астероидного пояса.">
-    <entry key="innerRadius" type="number" description="Внутренний радиус астероидного пояса.">24</entry>
-    <entry key="outerRadius" type="number" description="Внешний радиус астероидного пояса.">42</entry>
-    <entry key="count" type="number" description="Количество астероидов в поясе.">1600</entry>
-    <entry key="geometryRadius" type="number" description="Базовый радиус геометрии астероидов.">0.35</entry>
-    <entry key="geometryDetail" type="number" description="Уровень детализации геометрии астероидов.">0</entry>
-    <entry key="materialColor" type="string" description="Цвет материала астероидов.">#666666</entry>
-    <entry key="roughness" type="number" description="Шероховатость материала астероидов.">1</entry>
-    <entry key="metalness" type="number" description="Металличность материала астероидов.">0</entry>
-    <entry key="heightSpread" type="number" description="Диапазон разброса астероидов по высоте.">2.8</entry>
-    <entry key="scaleRange" type="object" description="Диапазон масштабов отдельных астероидов.">
-      <entry key="min" type="number" description="Минимальный масштаб астероида.">0.4</entry>
-      <entry key="max" type="number" description="Максимальный масштаб астероида.">1.2</entry>
+  <entry key="asteroidBelt" type="object" title="Астероидный пояс" description="Параметры генерации астероидного пояса.">
+    <entry key="innerRadius" type="number" title="Внутренний радиус" description="Внутренний радиус астероидного пояса.">24</entry>
+    <entry key="outerRadius" type="number" title="Внешний радиус" description="Внешний радиус астероидного пояса.">42</entry>
+    <entry key="count" type="number" title="Количество" description="Количество астероидов в поясе.">1600</entry>
+    <entry key="geometryRadius" type="number" title="Радиус геометрии" description="Базовый радиус геометрии астероидов.">0.35</entry>
+    <entry key="geometryDetail" type="number" title="Детализация" description="Уровень детализации геометрии астероидов.">0</entry>
+    <entry key="materialColor" type="string" title="Цвет материала" description="Цвет материала астероидов.">#666666</entry>
+    <entry key="roughness" type="number" title="Шероховатость" description="Шероховатость материала астероидов.">1</entry>
+    <entry key="metalness" type="number" title="Металличность" description="Металличность материала астероидов.">0</entry>
+    <entry key="heightSpread" type="number" title="Разброс по высоте" description="Диапазон разброса астероидов по высоте.">2.8</entry>
+    <entry key="scaleRange" type="object" title="Диапазон масштабов" description="Диапазон масштабов отдельных астероидов.">
+      <entry key="min" type="number" title="Минимум" description="Минимальный масштаб астероида.">0.4</entry>
+      <entry key="max" type="number" title="Максимум" description="Максимальный масштаб астероида.">1.2</entry>
     </entry>
   </entry>
 </config>

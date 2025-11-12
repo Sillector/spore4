@@ -39,12 +39,13 @@ function parsePrimitive(type, text) {
   return raw;
 }
 
-function ensureMeta(meta, path, type, description) {
+function ensureMeta(meta, path, type, description, title) {
   const key = path.join('.');
   const current = meta[key] || {};
   meta[key] = {
     type: current.type || type,
-    description: description ?? current.description ?? ''
+    description: description ?? current.description ?? '',
+    title: title ?? current.title ?? ''
   };
 }
 
@@ -53,8 +54,9 @@ function parseArray(items, path, meta) {
   return nodes.map((item, index) => {
     const itemType = item['@_type'] || (item.entry ? 'object' : item.item ? 'array' : 'string');
     const description = item['@_description'] || '';
+    const title = item['@_title'] || '';
     const nextPath = path.concat(String(index));
-    ensureMeta(meta, nextPath, itemType, description);
+    ensureMeta(meta, nextPath, itemType, description, title);
     if (itemType === 'object') {
       return parseEntries(item.entry, nextPath, meta);
     }
@@ -75,12 +77,13 @@ function parseEntries(entries, path, meta) {
     }
     const type = node['@_type'] || (node.entry ? 'object' : node.item ? 'array' : 'string');
     const description = node['@_description'] || '';
+    const title = node['@_title'] || '';
     const nextPath = path.concat(key);
-    ensureMeta(meta, nextPath, type, description);
+    ensureMeta(meta, nextPath, type, description, title);
     if (type === 'object') {
       result[key] = parseEntries(node.entry, nextPath, meta);
     } else if (type === 'array') {
-      ensureMeta(meta, nextPath, 'array', description);
+      ensureMeta(meta, nextPath, 'array', description, title);
       result[key] = parseArray(node.item, nextPath, meta);
     } else {
       result[key] = parsePrimitive(type, node['#text']);
@@ -119,11 +122,15 @@ function buildItems(values, path, meta) {
     const metaEntry = meta[nextPath.join('.')] || {};
     const type = metaEntry.type || inferType(item);
     const description = metaEntry.description || '';
+    const title = metaEntry.title || '';
     const node = {
       '@_type': type
     };
     if (description) {
       node['@_description'] = description;
+    }
+    if (title) {
+      node['@_title'] = title;
     }
     if (type === 'object') {
       node.entry = buildEntries(item, nextPath, meta);
@@ -143,12 +150,16 @@ function buildEntries(values, path, meta) {
     const metaEntry = meta[nextPath.join('.')] || {};
     const type = metaEntry.type || inferType(value);
     const description = metaEntry.description || '';
+    const title = metaEntry.title || '';
     const node = {
       '@_key': key,
       '@_type': type
     };
     if (description) {
       node['@_description'] = description;
+    }
+    if (title) {
+      node['@_title'] = title;
     }
     if (type === 'object') {
       node.entry = buildEntries(value, nextPath, meta);
@@ -170,13 +181,19 @@ export function parseConfigXml(xmlSource) {
   }
   const meta = {};
   const data = parseEntries(root.entry, [], meta);
-  return { name: root['@_name'] || '', data, meta };
+  return {
+    name: root['@_name'] || '',
+    title: root['@_title'] || root['@_name'] || '',
+    data,
+    meta
+  };
 }
 
-export function serializeConfigXml(name, data, meta) {
+export function serializeConfigXml(name, data, meta, title = '') {
   const root = {
     config: {
       '@_name': name,
+      ...(title ? { '@_title': title } : {}),
       entry: buildEntries(data, [], meta)
     }
   };

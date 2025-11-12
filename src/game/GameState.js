@@ -1,6 +1,7 @@
 import { getConfig } from '../config/store.js';
 
 const orbitConfig = getConfig('orbit');
+const galaxyConfig = getConfig('galaxy');
 
 export class GameState {
   constructor() {
@@ -10,13 +11,28 @@ export class GameState {
     this.currentSystem = null;
     this.currentPlanet = null;
     this.pressedKeys = new Set();
-    this.zoomProgress = {
-      galaxy: 0,
+    const galaxyZoomConfig = galaxyConfig?.zoom ?? {};
+    const galaxyZoomLimit = Math.max(galaxyZoomConfig.cameraLimit ?? 1, 1e-4);
+    const galaxyDefaultProgress = galaxyZoomConfig.defaultProgress ?? 0;
+    this.zoomLimits = {
+      galaxy: galaxyZoomLimit,
+      system: 1
+    };
+    this.zoomDefaults = {
+      galaxy: galaxyDefaultProgress,
       system: 0
     };
+    this.zoomProgress = {
+      galaxy: this.zoomDefaults.galaxy,
+      system: this.zoomDefaults.system
+    };
     this.zoomSmooth = {
-      galaxy: 0,
-      system: 0
+      galaxy: Math.min(this.zoomDefaults.galaxy / this.zoomLimits.galaxy, 1),
+      system: this.zoomDefaults.system
+    };
+    this.zoomSnap = {
+      galaxy: true,
+      system: true
     };
     this.orbitMotion = {
       theta: (orbitConfig.initialAngles.theta * Math.PI) / 180,
@@ -30,12 +46,17 @@ export class GameState {
 
   resetZoom(level) {
     if (!level || level === 'galaxy') {
-      this.zoomProgress.galaxy = 0;
-      this.zoomSmooth.galaxy = 0;
+      this.zoomProgress.galaxy = this.zoomDefaults.galaxy;
+      this.zoomSmooth.galaxy = Math.min(
+        this.zoomDefaults.galaxy / this.zoomLimits.galaxy,
+        1
+      );
+      this.zoomSnap.galaxy = true;
     }
     if (!level || level === 'system') {
-      this.zoomProgress.system = 0;
-      this.zoomSmooth.system = 0;
+      this.zoomProgress.system = this.zoomDefaults.system;
+      this.zoomSmooth.system = this.zoomDefaults.system;
+      this.zoomSnap.system = true;
     }
   }
 

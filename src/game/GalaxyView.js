@@ -164,12 +164,18 @@ export class GalaxyView {
       0,
       1
     );
-    this.state.zoomSmooth.galaxy = THREE.MathUtils.damp(
-      this.state.zoomSmooth.galaxy,
-      targetZoom,
-      this.config.zoom.damping,
-      delta
-    );
+    const shouldSnap = Boolean(this.state.zoomSnap?.galaxy);
+    if (shouldSnap) {
+      this.state.zoomSmooth.galaxy = targetZoom;
+      this.state.zoomSnap.galaxy = false;
+    } else {
+      this.state.zoomSmooth.galaxy = THREE.MathUtils.damp(
+        this.state.zoomSmooth.galaxy,
+        targetZoom,
+        this.config.zoom.damping,
+        delta
+      );
+    }
     const zoomNormalized = this.state.zoomSmooth.galaxy;
     const zoom = zoomNormalized * this.cameraZoomLimit;
     const targetY = THREE.MathUtils.lerp(
@@ -189,7 +195,11 @@ export class GalaxyView {
       this.config.camera.follow.min,
       this.config.camera.follow.max
     );
-    camera.position.lerp(cameraTarget, followAlpha);
+    if (shouldSnap) {
+      camera.position.copy(cameraTarget);
+    } else {
+      camera.position.lerp(cameraTarget, followAlpha);
+    }
     camera.lookAt(ship.position);
     const topTilt = THREE.MathUtils.degToRad(this.config.groupTilt.far);
     const closeTilt = THREE.MathUtils.degToRad(this.config.groupTilt.near);
