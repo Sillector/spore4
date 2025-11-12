@@ -13,8 +13,8 @@
   </entry>
   <entry key="zoom" type="object" description="Настройки масштабирования камеры в режиме галактики.">
     <entry key="step" type="number" description="Шаг изменения масштаба за единичное действие пользователя.">0.16</entry>
-    <entry key="enterThreshold" type="number" description="Порог масштаба, при котором запускается переход в систему.">1.28</entry>
-    <entry key="cameraLimit" type="number" description="Максимальное значение прогресса, влияющего на приближение камеры перед переходом в систему.">1</entry>
+    <entry key="enterThreshold" type="number" description="Порог масштаба, при котором запускается переход в систему.">2</entry>
+    <entry key="cameraLimit" type="number" description="Максимальное значение прогресса, влияющего на приближение камеры перед переходом в систему.">1.7</entry>
     <entry key="damping" type="number" description="Сила сглаживания переходов масштаба камеры.">6</entry>
   </entry>
   <entry key="camera" type="object" description="Параметры поведения камеры при движении по галактике.">
@@ -95,3 +95,4 @@
     </entry>
   </entry>
 </config>
+
