@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { getConfig } from '../config/store.js';
-import { createFollowTarget, createPointTarget } from './targets.js';
+import { createFollowTarget, createPathTarget, createPointTarget } from './targets.js';
 
 const systemConfig = getConfig('system');
 const shipConfig = getConfig('ship');
@@ -8,7 +8,15 @@ const shipConfig = getConfig('ship');
 const cameraOffset = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
 const planetWorldPosition = new THREE.Vector3();
+const shipWorldPosition = new THREE.Vector3();
 const approachDirection = new THREE.Vector3();
+const approachPoint = new THREE.Vector3();
+const approachOffset = new THREE.Vector3();
+const detourShipPoint = new THREE.Vector3();
+const detourTargetPoint = new THREE.Vector3();
+const obstacleCenter = new THREE.Vector3();
+const segmentDirection = new THREE.Vector3();
+const segmentToCenter = new THREE.Vector3();
 
 export class SystemView {
   constructor(scene, state) {
@@ -16,6 +24,7 @@ export class SystemView {
     this.state = state;
     this.config = systemConfig;
     this.wrapper = null;
+    this.hoveredPlanet = null;
   }
 
   pick(raycaster) {
@@ -27,7 +36,8 @@ export class SystemView {
   moveShipToPlanet(ship, planetData) {
     this.state.currentPlanet = planetData;
     planetData.mesh.getWorldPosition(planetWorldPosition);
-    approachDirection.copy(ship.position).sub(planetWorldPosition);
+    shipWorldPosition.copy(ship.position);
+    approachDirection.copy(shipWorldPosition).sub(planetWorldPosition);
     if (approachDirection.lengthSq() < 1e-6) {
       approachDirection.copy(planetWorldPosition);
       if (approachDirection.lengthSq() < 1e-6) {
@@ -35,13 +45,44 @@ export class SystemView {
       }
     }
     approachDirection.normalize();
-    ship.setTarget(
-      createFollowTarget(
-        planetData.mesh,
-        planetData.radius + this.config.ship.approachOffset,
-        approachDirection
-      )
+    const altitude = planetData.radius + this.config.ship.approachOffset;
+    approachPoint
+      .copy(planetWorldPosition)
+      .addScaledVector(approachDirection, altitude);
+    const detourHeight = this.calculateDetourHeight(
+      shipWorldPosition,
+      approachPoint,
+      planetData
     );
+    approachOffset.copy(approachPoint).sub(planetWorldPosition);
+    if (approachOffset.lengthSq() < 1e-6) {
+      approachOffset.set(0, 0, 1);
+    } else {
+      approachOffset.normalize();
+    }
+    if (detourHeight !== null) {
+      const detourPoints = [];
+      if (shipWorldPosition.y < detourHeight - 1e-3) {
+        detourShipPoint.set(shipWorldPosition.x, detourHeight, shipWorldPosition.z);
+        detourPoints.push(detourShipPoint.clone());
+      }
+      if (approachPoint.y < detourHeight - 1e-3) {
+        detourTargetPoint.set(approachPoint.x, detourHeight, approachPoint.z);
+        detourPoints.push(detourTargetPoint.clone());
+      }
+      if (detourPoints.length > 0) {
+        ship.setTarget(
+          createPathTarget(
+            detourPoints,
+            createFollowTarget(planetData.mesh, altitude, approachOffset)
+          )
+        );
+        ship.setSpeed(shipConfig.speeds.system);
+        this.state.resetZoom('system');
+        return;
+      }
+    }
+    ship.setTarget(createFollowTarget(planetData.mesh, altitude, approachOffset));
     ship.setSpeed(shipConfig.speeds.system);
     this.state.resetZoom('system');
   }
@@ -127,6 +168,13 @@ export class SystemView {
         radius,
         mesh: planet
       };
+      const label = this.createPlanetLabel(planet.userData.name, radius);
+      if (label) {
+        planet.add(label);
+        label.position.set(0, radius + 2, 0);
+        label.visible = false;
+        planet.userData.label = label;
+      }
       group.add(planet);
       planets.push({ ...planet.userData, mesh: planet });
       orbitRadius += THREE.MathUtils.randFloat(
@@ -209,11 +257,31 @@ export class SystemView {
     this.state.resetZoom();
     this.state.currentStar = starData;
     this.state.currentPlanet = null;
+    this.hoveredPlanet = null;
     this.state.level = 'system';
   }
 
   exit() {
     if (!this.wrapper) return;
+    if (this.hoveredPlanet?.label) {
+      this.hoveredPlanet.label.visible = false;
+    }
+    this.hoveredPlanet = null;
+    this.wrapper.planets.forEach((planet) => {
+      if (planet.label) {
+        planet.mesh.remove(planet.label);
+        if (planet.label.material?.map) {
+          planet.label.material.map.dispose();
+        }
+        if (planet.label.material?.dispose) {
+          planet.label.material.dispose();
+        }
+        planet.label = null;
+        if (planet.mesh.userData) {
+          planet.mesh.userData.label = null;
+        }
+      }
+    });
     this.scene.remove(this.wrapper.group);
     this.wrapper = null;
     this.state.currentSystem = null;
@@ -272,5 +340,112 @@ export class SystemView {
     if (this.wrapper) {
       this.wrapper.group.visible = value;
     }
+  }
+
+  setHoveredPlanet(planetData) {
+    if (this.hoveredPlanet === planetData) return;
+    if (this.hoveredPlanet?.label) {
+      this.hoveredPlanet.label.visible = false;
+    }
+    this.hoveredPlanet = planetData || null;
+    if (this.hoveredPlanet?.label) {
+      this.hoveredPlanet.label.visible = true;
+    }
+  }
+
+  createPlanetLabel(name, radius) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 128;
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return null;
+    }
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    const paddingX = 18;
+    context.font = '36px "Roboto", sans-serif';
+    context.textBaseline = 'middle';
+    const metrics = context.measureText(name);
+    const textWidth = metrics.width;
+    const boxWidth = Math.min(canvas.width - paddingX * 2, textWidth + paddingX * 2);
+    const boxHeight = 56;
+    const boxX = (canvas.width - boxWidth) / 2;
+    const boxY = (canvas.height - boxHeight) / 2;
+    context.fillStyle = 'rgba(0, 0, 0, 0.65)';
+    context.fillRect(boxX, boxY, boxWidth, boxHeight);
+    context.fillStyle = '#ffffff';
+    context.fillText(name, canvas.width / 2 - textWidth / 2, canvas.height / 2);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    material.depthWrite = false;
+    material.depthTest = false;
+    const sprite = new THREE.Sprite(material);
+    const scaleX = Math.max(radius * 3, 6);
+    const scaleY = scaleX * 0.5;
+    sprite.scale.set(scaleX, scaleY, 1);
+    sprite.renderOrder = 10;
+    return sprite;
+  }
+
+  calculateDetourHeight(shipPosition, targetPosition, targetPlanet) {
+    if (!this.wrapper) return null;
+    const clearance = this.config.ship.avoidanceClearance ?? 2;
+    let requiredHeight = null;
+    const starRadius = this.config.starCore.radius;
+    if (this.wrapper.star) {
+      this.wrapper.star.getWorldPosition(obstacleCenter);
+      if (
+        this.segmentIntersectsSphere(
+          shipPosition,
+          targetPosition,
+          obstacleCenter,
+          starRadius + clearance
+        )
+      ) {
+        const height = obstacleCenter.y + starRadius + clearance;
+        if (requiredHeight === null || height > requiredHeight) {
+          requiredHeight = height;
+        }
+      }
+    }
+    this.wrapper.planets.forEach((planet) => {
+      if (planet === targetPlanet) return;
+      planet.mesh.getWorldPosition(obstacleCenter);
+      const effectiveRadius = planet.radius + clearance;
+      if (
+        this.segmentIntersectsSphere(
+          shipPosition,
+          targetPosition,
+          obstacleCenter,
+          effectiveRadius
+        )
+      ) {
+        const height = obstacleCenter.y + planet.radius + clearance;
+        if (requiredHeight === null || height > requiredHeight) {
+          requiredHeight = height;
+        }
+      }
+    });
+    return requiredHeight;
+  }
+
+  segmentIntersectsSphere(start, end, center, radius) {
+    segmentDirection.copy(end).sub(start);
+    const lengthSq = segmentDirection.lengthSq();
+    if (lengthSq < 1e-6) return false;
+    segmentToCenter.copy(start).sub(center);
+    const a = lengthSq;
+    const b = 2 * segmentToCenter.dot(segmentDirection);
+    const c = segmentToCenter.lengthSq() - radius * radius;
+    const discriminant = b * b - 4 * a * c;
+    if (discriminant < 0) {
+      return false;
+    }
+    const sqrtDiscriminant = Math.sqrt(discriminant);
+    const invDenominator = 1 / (2 * a);
+    const t1 = (-b - sqrtDiscriminant) * invDenominator;
+    const t2 = (-b + sqrtDiscriminant) * invDenominator;
+    return (t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1);
   }
 }

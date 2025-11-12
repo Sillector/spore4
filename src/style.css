@@ -42,28 +42,6 @@ body {
   font-size: 0.85rem;
 }
 
-.planet-tooltip {
-  position: absolute;
-  padding: 0.35rem 0.6rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(120, 180, 255, 0.35);
-  background: rgba(10, 20, 35, 0.85);
-  color: #e0f2ff;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  pointer-events: none;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translate(-9999px, -9999px);
-  transition: opacity 0.15s ease;
-  box-shadow: 0 0.75rem 1.5rem rgba(10, 40, 90, 0.35);
-  z-index: 1500;
-}
-
-.planet-tooltip--visible {
-  opacity: 1;
-}
-
 canvas {
   display: block;
 }

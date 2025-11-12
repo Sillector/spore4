@@ -39,6 +39,12 @@ export class ShipController {
 
   snapToTarget() {
     if (!this.target) return;
+    if (this.target.type === 'path') {
+      if (this.target.points.length > 0) {
+        this.ship.position.copy(this.target.points[0]);
+      }
+      return;
+    }
     const targetPosition = resolveTargetPosition(this.target);
     if (targetPosition) {
       this.ship.position.copy(targetPosition);
@@ -47,6 +53,11 @@ export class ShipController {
 
   update(delta) {
     if (!this.target) return;
+    if (this.target.type === 'path') {
+      this.updatePathTarget(delta);
+      return;
+    }
+
     const targetPosition = resolveTargetPosition(this.target);
     if (!targetPosition) {
       this.target = null;
@@ -84,6 +95,40 @@ export class ShipController {
         lookTarget.copy(this.ship.position).add(tempDirection.normalize());
         this.ship.lookAt(lookTarget);
       }
+    }
+  }
+
+  updatePathTarget(delta) {
+    if (!this.target || this.target.type !== 'path') return;
+    if (!this.target.points || this.target.points.length === 0) {
+      this.target = this.target.finalTarget || null;
+      return;
+    }
+
+    const index = Math.min(this.target.currentIndex ?? 0, this.target.points.length - 1);
+    const waypoint = this.target.points[index];
+    tempDirection.copy(waypoint).sub(this.ship.position);
+    const distance = tempDirection.length();
+    const moveSpeed = this.speed * delta;
+    if (distance > shipConfig.movement.arrivalThreshold) {
+      tempDirection.normalize();
+      this.ship.position.addScaledVector(tempDirection, Math.min(moveSpeed, distance));
+    } else {
+      this.ship.position.copy(waypoint);
+      this.target.currentIndex = index + 1;
+      if (this.target.currentIndex >= this.target.points.length) {
+        const finalTarget = this.target.finalTarget || null;
+        this.target = finalTarget;
+        if (finalTarget) {
+          this.update(delta);
+        }
+        return;
+      }
+    }
+
+    if (tempDirection.lengthSq() > 1e-5) {
+      lookTarget.copy(this.ship.position).add(tempDirection.normalize());
+      this.ship.lookAt(lookTarget);
     }
   }
 

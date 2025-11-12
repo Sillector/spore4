@@ -16,6 +16,15 @@ export function createFollowTarget(mesh, altitude = 0, direction = null) {
   };
 }
 
+export function createPathTarget(points, finalTarget = null) {
+  return {
+    type: 'path',
+    points: points.map((point) => point.clone()),
+    finalTarget,
+    currentIndex: 0
+  };
+}
+
 export function resolveTargetPosition(target) {
   if (!target) return null;
   if (target.type === 'point') {

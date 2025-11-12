@@ -48,10 +48,6 @@ export class SpaceGame {
     this.systemView = new SystemView(this.scene, this.state);
     this.orbitController = new OrbitController(this.scene, this.state);
 
-    this.planetTooltip = document.createElement('div');
-    this.planetTooltip.className = 'planet-tooltip';
-    this.container.appendChild(this.planetTooltip);
-
     this.cameraBaseOffset = new THREE.Vector3(
       galaxyConfig.cameraBaseOffset.x,
       galaxyConfig.cameraBaseOffset.y,
@@ -65,7 +61,6 @@ export class SpaceGame {
     createBackgroundNebula(this.scene);
 
     this.initializeStartingStar();
-    this.hidePlanetTooltip();
     this.bindEvents();
     this.animate = this.animate.bind(this);
     this.animate();
@@ -122,7 +117,11 @@ export class SpaceGame {
     const localY = event.clientY - rect.top;
     this.pointer.x = (localX / rect.width) * 2 - 1;
     this.pointer.y = -(localY / rect.height) * 2 + 1;
-    this.updatePlanetTooltip(localX, localY);
+    if (this.state.level === 'system') {
+      this.updateSystemHover();
+    } else {
+      this.systemView.setHoveredPlanet(null);
+    }
   }
 
   onPointerDown(event) {
@@ -138,7 +137,7 @@ export class SpaceGame {
   }
 
   onPointerLeave() {
-    this.hidePlanetTooltip();
+    this.systemView.setHoveredPlanet(null);
   }
 
   onWheel(event) {
@@ -191,7 +190,7 @@ export class SpaceGame {
   enterSystem(starData) {
     if (!starData) return;
     this.state.level = 'transition';
-    this.hidePlanetTooltip();
+    this.systemView.setHoveredPlanet(null);
     this.galaxyView.setVisible(false);
     this.orbitController.exit(this.ship, null);
     this.systemView.enter(starData, this.ship, this.camera);
@@ -201,7 +200,7 @@ export class SpaceGame {
     this.systemView.exit();
     this.orbitController.exit(this.ship, null);
     this.galaxyView.setVisible(true);
-    this.hidePlanetTooltip();
+    this.systemView.setHoveredPlanet(null);
     const target = this.state.currentStar
       ? createFollowTarget(
           this.state.currentStar.mesh,
@@ -219,7 +218,7 @@ export class SpaceGame {
 
   enterOrbit(planetData) {
     if (!planetData) return;
-    this.hidePlanetTooltip();
+    this.systemView.setHoveredPlanet(null);
     this.systemView.setVisible(false);
     this.orbitController.enter(planetData, this.ship, this.camera);
   }
@@ -235,34 +234,18 @@ export class SpaceGame {
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
   }
 
-  hidePlanetTooltip() {
-    if (!this.planetTooltip) return;
-    this.planetTooltip.textContent = '';
-    this.planetTooltip.classList.remove('planet-tooltip--visible');
-    this.planetTooltip.style.transform = 'translate(-9999px, -9999px)';
-  }
-
-  updatePlanetTooltip(localX, localY) {
-    if (!this.planetTooltip) return;
-    if (this.state.level !== 'system') {
-      this.hidePlanetTooltip();
-      return;
-    }
+  updateSystemHover() {
     const intersects = this.pickIntersectables();
     if (!intersects.length) {
-      this.hidePlanetTooltip();
+      this.systemView.setHoveredPlanet(null);
       return;
     }
     const planet = intersects[0].object.userData;
-    if (!planet?.name) {
-      this.hidePlanetTooltip();
+    if (!planet?.mesh) {
+      this.systemView.setHoveredPlanet(null);
       return;
     }
-    this.planetTooltip.textContent = planet.name;
-    const tooltipX = Math.round(localX + 12);
-    const tooltipY = Math.round(localY + 12);
-    this.planetTooltip.style.transform = `translate(${tooltipX}px, ${tooltipY}px)`;
-    this.planetTooltip.classList.add('planet-tooltip--visible');
+    this.systemView.setHoveredPlanet(planet);
   }
 
   animate() {
@@ -286,7 +269,6 @@ export class SpaceGame {
     this.renderer.dispose();
     this.renderer.domElement.remove();
     this.ship.dispose();
-    this.planetTooltip?.remove();
     if (this.boundPointerMove) {
       this.renderer.domElement.removeEventListener('pointermove', this.boundPointerMove);
     }
