@@ -9,7 +9,21 @@
     <entry key="lightnessVariance" type="number" title="Разброс яркости" description="Диапазон вариации яркости фоновых звёзд.">0.12</entry>
   </entry>
   <entry key="material" type="object" title="Материал" description="Параметры материала для частиц фоновых звёзд.">
-    <entry key="size" type="number" title="Размер точки" description="Размер точек, используемых для отображения звёзд.">0.9</entry>
-    <entry key="opacity" type="number" title="Прозрачность" description="Прозрачность фоновых звёзд.">0.38</entry>
+    <entry key="size" type="number" title="Базовый размер" description="Базовый размер точек, используемых для отображения звёзд.">18</entry>
+    <entry key="sizeVariance" type="number" title="Вариация размера" description="Разброс по размеру для придания разнообразия фоновой россыпи.">12</entry>
+    <entry key="opacity" type="number" title="Прозрачность" description="Прозрачность фоновых звёзд.">0.75</entry>
+    <entry key="pulseSpeed" type="number" title="Скорость пульсации" description="Скорость пульсации звёзд в шейдере.">0.08</entry>
+    <entry key="haloIntensity" type="number" title="Интенсивность ореола" description="Интенсивность ореола вокруг звёзд.">1.25</entry>
+  </entry>
+  <entry key="skybox" type="object" title="Небесная сфера" description="Настройки фонового скайбокса.">
+    <entry key="radius" type="number" title="Радиус" description="Радиус сферы скайбокса.">1600</entry>
+    <entry key="starCount" type="number" title="Количество звёзд" description="Количество звёзд, рисуемых на текстуре скайбокса.">900</entry>
+    <entry key="gradientTop" type="string" title="Верхний градиент" description="Цвет верхней части неба.">#0a0d1e</entry>
+    <entry key="gradientBottom" type="string" title="Нижний градиент" description="Цвет нижней части неба.">#040611</entry>
+    <entry key="accentColor" type="string" title="Цвет туманности" description="Оттенок для акцентных туманностей.">#2a44a8</entry>
+    <entry key="twinkleColor" type="string" title="Цвет мерцания" description="Оттенок мерцающих звёзд.">#9bcaff</entry>
+    <entry key="nebulaIntensity" type="number" title="Интенсивность туманности" description="Интенсивность и количество туманностей на скайбоксе.">2</entry>
+    <entry key="textureWidth" type="number" title="Ширина текстуры" description="Ширина процедурно генерируемой текстуры.">1024</entry>
+    <entry key="textureHeight" type="number" title="Высота текстуры" description="Высота процедурно генерируемой текстуры.">512</entry>
   </entry>
 </config>
