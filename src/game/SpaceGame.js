@@ -64,7 +64,7 @@ export class SpaceGame {
     this.resizeObserver.observe(this.container);
 
     this.setupLights();
-    this.skybox = createBackgroundSkybox(this.scene);
+    this.skybox = createBackgroundSkybox(this.scene, this.camera);
     if (this.skybox) {
       this.skybox.position.copy(this.camera.position);
     }
@@ -314,6 +314,7 @@ export class SpaceGame {
       this.skybox.material?.dispose?.();
       this.skybox.geometry?.dispose?.();
       this.skybox = null;
+      this.scene.environment = null;
     }
   }
 }

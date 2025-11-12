@@ -4,7 +4,7 @@ import { createWorldRandom } from './random.js';
 
 const backgroundConfig = getConfig('background');
 const defaultSkybox = {
-  size: 1024,
+  size: 2048,
   radius: 2400,
   horizontalRepeat: 2,
   topColor: '#0b1029',
@@ -88,6 +88,8 @@ function createSkySphereTexture() {
   const random = createWorldRandom('sky-sphere');
   const totalStars = Math.max(180, backgroundConfig.starCount ?? 1200);
   const starHighlight = starColor.clone().lerp(new THREE.Color(0xffffff), 0.45);
+  context.save();
+  context.globalCompositeOperation = 'lighter';
   for (let i = 0; i < totalStars; i += 1) {
     const u = random.next();
     const v = random.next();
@@ -97,32 +99,38 @@ function createSkySphereTexture() {
     const y = (phi / Math.PI) * canvas.height;
     const baseRadius = random.float(0.35, 1.4);
     const radius = baseRadius * (canvas.height / 720);
+    const outerRadius = radius * 3.4;
     const twinkle = 0.35 + random.float(0, twinkleIntensity);
-    context.fillStyle = toRgba(starColor, 0.2 + twinkle * 0.5);
+
+    const coreGradient = context.createRadialGradient(x, y, 0, x, y, outerRadius);
+    coreGradient.addColorStop(0, toRgba(starHighlight, 0.75 + twinkle * 0.15));
+    coreGradient.addColorStop(0.45, toRgba(starColor, 0.55 + twinkle * 0.3));
+    coreGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    context.fillStyle = coreGradient;
     context.beginPath();
-    context.arc(x, y, radius, 0, Math.PI * 2);
+    context.arc(x, y, outerRadius, 0, Math.PI * 2);
     context.fill();
 
     if (random.next() > 0.72) {
-      const alpha = 0.08 + twinkle * 0.22;
+      const alpha = 0.04 + twinkle * 0.18;
       context.strokeStyle = toRgba(starHighlight, alpha);
-      context.lineWidth = Math.max(0.45, radius * 0.55);
+      context.lineWidth = Math.max(0.3, radius * 0.45);
       context.beginPath();
-      context.moveTo(x - radius * 2.8, y);
-      context.lineTo(x + radius * 2.8, y);
+      context.moveTo(x - radius * 3.1, y);
+      context.lineTo(x + radius * 3.1, y);
       context.stroke();
       context.beginPath();
-      context.moveTo(x, y - radius * 2.8);
-      context.lineTo(x, y + radius * 2.8);
+      context.moveTo(x, y - radius * 3.1);
+      context.lineTo(x, y + radius * 3.1);
       context.stroke();
     }
   }
-  context.globalCompositeOperation = 'source-over';
+  context.restore();
 
   return { canvas, horizontalRepeat };
 }
 
-export function createBackgroundSkybox(scene) {
+export function createBackgroundSkybox(scene, camera) {
   const existing = scene.getObjectByName('SkySphere');
   if (existing) {
     scene.remove(existing);
@@ -147,6 +155,13 @@ export function createBackgroundSkybox(scene) {
 
   const skyboxConfig = backgroundConfig.skybox ?? {};
   const radius = Math.max(10, skyboxConfig.radius ?? defaultSkybox.radius);
+  if (camera) {
+    const padding = Math.max(10, radius * 0.05);
+    if (camera.far <= radius + padding) {
+      camera.far = radius + padding;
+      camera.updateProjectionMatrix();
+    }
+  }
   const geometry = new THREE.SphereGeometry(radius, 64, 48);
   const material = new THREE.MeshBasicMaterial({
     map: texture,
@@ -161,6 +176,6 @@ export function createBackgroundSkybox(scene) {
   skySphere.frustumCulled = false;
   scene.add(skySphere);
   scene.background = null;
-  scene.environment = null;
+  scene.environment = texture;
   return skySphere;
 }
