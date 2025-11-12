@@ -25,6 +25,7 @@ export class GalaxyView {
     this.scene = scene;
     this.state = state;
     this.config = galaxyConfig;
+    this.cameraZoomLimit = Math.max(this.config.zoom.cameraLimit ?? 1, 1e-4);
     this.group = new THREE.Group();
     this.group.rotation.x = THREE.MathUtils.degToRad(this.config.groupTilt.far);
     this.group.name = 'Galaxy';
@@ -157,9 +158,9 @@ export class GalaxyView {
 
   update(delta, ship, camera) {
     this.group.rotation.y += delta * this.config.rotationSpeed;
-    const threshold = Math.max(this.config.zoom.enterThreshold, 1e-5);
+    const rawProgress = Math.min(this.state.zoomProgress.galaxy, this.cameraZoomLimit);
     const targetZoom = THREE.MathUtils.clamp(
-      this.state.zoomProgress.galaxy / threshold,
+      rawProgress / this.cameraZoomLimit,
       0,
       1
     );
@@ -169,7 +170,8 @@ export class GalaxyView {
       this.config.zoom.damping,
       delta
     );
-    const zoom = this.state.zoomSmooth.galaxy;
+    const zoomNormalized = this.state.zoomSmooth.galaxy;
+    const zoom = zoomNormalized * this.cameraZoomLimit;
     const targetY = THREE.MathUtils.lerp(
       this.config.camera.offset.startY,
       this.config.camera.offset.endY,
@@ -191,7 +193,7 @@ export class GalaxyView {
     camera.lookAt(ship.position);
     const topTilt = THREE.MathUtils.degToRad(this.config.groupTilt.far);
     const closeTilt = THREE.MathUtils.degToRad(this.config.groupTilt.near);
-    this.group.rotation.x = THREE.MathUtils.lerp(topTilt, closeTilt, zoom);
+    this.group.rotation.x = THREE.MathUtils.lerp(topTilt, closeTilt, zoomNormalized);
     this.updateHoverVisuals(ship);
   }
 
