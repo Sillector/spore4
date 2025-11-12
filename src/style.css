@@ -16,6 +16,17 @@ body {
   position: relative;
 }
 
+.app-shell {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.game-surface {
+  width: 100%;
+  height: 100%;
+}
+
 .info-panel {
   position: absolute;
   top: 1rem;
