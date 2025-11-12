@@ -13,7 +13,8 @@
   </entry>
   <entry key="zoom" type="object" description="Настройки масштабирования камеры в режиме галактики.">
     <entry key="step" type="number" description="Шаг изменения масштаба за единичное действие пользователя.">0.16</entry>
-    <entry key="enterThreshold" type="number" description="Порог масштаба, при котором запускается переход в систему.">1.28</entry>
+    <entry key="enterThreshold" type="number" description="Порог масштаба, при котором запускается переход в систему.">2</entry>
+    <entry key="cameraLimit" type="number" description="Максимальное значение прогресса, влияющего на приближение камеры перед переходом в систему.">1.7</entry>
     <entry key="damping" type="number" description="Сила сглаживания переходов масштаба камеры.">6</entry>
   </entry>
   <entry key="camera" type="object" description="Параметры поведения камеры при движении по галактике.">
@@ -44,11 +45,38 @@
       <entry key="heightSegments" type="number" description="Количество сегментов по высоте сферы.">24</entry>
     </entry>
     <entry key="color" type="object" description="Настройки генерации цвета звёзд.">
-      <entry key="hueBase" type="number" description="Базовый оттенок звёзд в пространстве HSL.">0.55</entry>
-      <entry key="hueVariance" type="number" description="Максимальное отклонение оттенка для разнообразия.">0.15</entry>
-      <entry key="saturation" type="number" description="Насыщенность цвета звезды.">0.8</entry>
-      <entry key="lightness" type="number" description="Яркость звезды в модели HSL.">0.6</entry>
-      <entry key="emissiveMultiplier" type="number" description="Множитель интенсивности эмиссионного свечения.">0.6</entry>
+      <entry key="palette" type="array" description="Доступные варианты оттенков звёзд.">
+        <item type="object" description="Красная звезда">
+          <entry key="hue" type="number" description="Оттенок в модели HSL.">0.02</entry>
+          <entry key="saturation" type="number" description="Насыщенность цвета.">0.78</entry>
+          <entry key="lightness" type="number" description="Яркость цвета.">0.56</entry>
+          <entry key="emissiveMultiplier" type="number" description="Усиление свечения.">0.8</entry>
+        </item>
+        <item type="object" description="Жёлтая звезда">
+          <entry key="hue" type="number">0.12</entry>
+          <entry key="saturation" type="number">0.72</entry>
+          <entry key="lightness" type="number">0.62</entry>
+          <entry key="emissiveMultiplier" type="number">0.75</entry>
+        </item>
+        <item type="object" description="Белая звезда">
+          <entry key="hue" type="number">0</entry>
+          <entry key="saturation" type="number">0.04</entry>
+          <entry key="lightness" type="number">0.92</entry>
+          <entry key="emissiveMultiplier" type="number">0.7</entry>
+        </item>
+        <item type="object" description="Голубая звезда">
+          <entry key="hue" type="number">0.58</entry>
+          <entry key="saturation" type="number">0.64</entry>
+          <entry key="lightness" type="number">0.68</entry>
+          <entry key="emissiveMultiplier" type="number">0.85</entry>
+        </item>
+      </entry>
+      <entry key="variance" type="object" description="Разброс параметров оттенков.">
+        <entry key="hue" type="number" description="Допустимое отклонение оттенка.">0.015</entry>
+        <entry key="saturation" type="number" description="Допустимое отклонение насыщенности.">0.06</entry>
+        <entry key="lightness" type="number" description="Допустимое отклонение яркости.">0.05</entry>
+      </entry>
+      <entry key="emissiveMultiplier" type="number" description="Значение по умолчанию для усиления свечения.">0.7</entry>
     </entry>
     <entry key="material" type="object" description="Параметры материала для звёзд.">
       <entry key="emissiveIntensity" type="number" description="Интенсивность эмиссионного свечения материала.">1.5</entry>
@@ -60,5 +88,11 @@
       <entry key="min" type="number" description="Минимальное числовое значение для генерации названия.">100</entry>
       <entry key="maxRange" type="number" description="Диапазон увеличения числовой части имени.">900</entry>
     </entry>
+    <entry key="hover" type="object" description="Параметры отображения дистанции при наведении на звезду.">
+      <entry key="lineColor" type="string" description="Цвет луча от корабля до звезды.">#ffffff</entry>
+      <entry key="lineOpacity" type="number" description="Прозрачность луча.">0.65</entry>
+      <entry key="labelOffset" type="number" description="Высота подписи расстояния над звездой.">6</entry>
+    </entry>
   </entry>
 </config>
+
