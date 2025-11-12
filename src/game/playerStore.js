@@ -3,6 +3,7 @@ const READ_INTERVAL = 1000;
 
 const defaultPlayerState = {
   currentStarId: null,
+  currentPlanetId: null,
   state: 'galaxy'
 };
 
@@ -38,6 +39,7 @@ function readStorage() {
     }
     return {
       currentStarId: parsed.currentStarId ?? null,
+      currentPlanetId: parsed.currentPlanetId ?? null,
       state: normalizeState(parsed.state)
     };
   } catch (error) {
@@ -83,6 +85,10 @@ export class PlayerStore {
       this.player.currentStarId = stored.currentStarId;
       changed = true;
     }
+    if (stored.currentPlanetId !== this.player.currentPlanetId) {
+      this.player.currentPlanetId = stored.currentPlanetId;
+      changed = true;
+    }
     if (stored.state && stored.state !== this.player.state) {
       this.player.state = stored.state;
       changed = true;
@@ -94,22 +100,30 @@ export class PlayerStore {
 
   syncFromState(state) {
     const starId = state?.currentStar?.id ?? null;
+    const planetId = state?.currentPlanet?.id ?? null;
     const level = state?.level ?? defaultPlayerState.state;
     const stableState = levelToPlayerState(level, Boolean(state?.currentPlanet));
     const nextState = {
       currentStarId: starId,
+      currentPlanetId: planetId,
       state: stableState
     };
     const hasChanges =
       nextState.currentStarId !== this.lastSyncedState.currentStarId ||
+      nextState.currentPlanetId !== this.lastSyncedState.currentPlanetId ||
       nextState.state !== this.lastSyncedState.state;
     if (!hasChanges) {
       return;
     }
     this.player.currentStarId = nextState.currentStarId;
+    this.player.currentPlanetId = nextState.currentPlanetId;
     this.player.state = nextState.state;
     Object.assign(this.lastSyncedState, nextState);
     writeStorage(this.player);
+  }
+
+  getSnapshot() {
+    return { ...this.player };
   }
 
   dispose() {

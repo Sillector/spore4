@@ -66,7 +66,10 @@ export class SpaceGame {
     this.setupLights();
     createBackgroundNebula(this.scene);
 
-    this.initializeStartingStar();
+    const restored = this.restorePlayerState();
+    if (!restored) {
+      this.initializeStartingStar();
+    }
     this.mouseInput = null;
     this.bindEvents();
     this.animate = this.animate.bind(this);
@@ -101,6 +104,57 @@ export class SpaceGame {
     this.ship.snapToTarget();
     this.camera.position.copy(this.ship.position).add(this.cameraBaseOffset);
     this.camera.lookAt(this.ship.position);
+  }
+
+  restorePlayerState() {
+    if (!this.playerStore) {
+      return false;
+    }
+    const snapshot = this.playerStore.getSnapshot();
+    if (!snapshot || snapshot.currentStarId === null) {
+      return false;
+    }
+    const starData = this.state.galaxyStars.find((star) => star.id === snapshot.currentStarId);
+    if (!starData) {
+      return false;
+    }
+    this.galaxyView.moveShipToStar(this.ship, starData);
+    this.ship.snapToTarget();
+    this.camera.position.copy(this.ship.position).add(this.cameraBaseOffset);
+    this.camera.lookAt(this.ship.position);
+    this.state.level = 'galaxy';
+    this.state.resetZoom('galaxy');
+    if (snapshot.state === 'galaxy') {
+      this.galaxyView.setVisible(true);
+      this.systemView.setVisible(false);
+      return true;
+    }
+    this.galaxyView.setVisible(false);
+    this.hoveredStar = null;
+    this.galaxyView.setHoveredStar(null);
+    this.systemView.setHoveredPlanet(null);
+    this.systemView.enter(starData, this.ship, this.camera, { autoSelectFirstPlanet: false });
+    let planetData = null;
+    if (snapshot.currentPlanetId !== null && this.state.currentSystem) {
+      planetData = this.state.currentSystem.planets.find(
+        (planet) => planet.id === snapshot.currentPlanetId
+      );
+    }
+    if (!planetData && snapshot.state === 'system' && this.state.currentSystem) {
+      planetData = this.state.currentSystem.planets[0] ?? null;
+    }
+    if (planetData) {
+      this.systemView.moveShipToPlanet(this.ship, planetData);
+      this.ship.snapToTarget();
+    }
+    if (snapshot.state === 'planet' && planetData) {
+      this.enterOrbit(planetData);
+    } else {
+      this.systemView.setVisible(true);
+      this.state.level = 'system';
+      this.state.resetZoom('system');
+    }
+    return true;
   }
 
   bindEvents() {
@@ -159,6 +213,7 @@ export class SpaceGame {
     this.camera.position.copy(this.ship.position).add(this.cameraBaseOffset);
     this.camera.lookAt(this.ship.position);
     this.state.level = 'galaxy';
+    this.state.currentPlanet = null;
     this.state.resetZoom();
     this.updateHoverSelection();
   }

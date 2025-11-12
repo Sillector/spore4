@@ -166,6 +166,7 @@ export class SystemView {
       planet.userData = {
         name: `${this.config.planet.naming.prefix}${i + 1}`,
         radius,
+        id: i,
         mesh: planet
       };
       const label = this.createPlanetLabel(planet.userData.name, radius);
@@ -230,7 +231,8 @@ export class SystemView {
     return belt;
   }
 
-  enter(starData, ship, camera) {
+  enter(starData, ship, camera, options = {}) {
+    const { autoSelectFirstPlanet = true } = options;
     if (this.wrapper) {
       this.scene.remove(this.wrapper.group);
     }
@@ -241,7 +243,7 @@ export class SystemView {
       this.config.ship.entryShipPosition.y,
       this.config.ship.entryShipPosition.z
     );
-    if (system.planets.length > 0) {
+    if (system.planets.length > 0 && autoSelectFirstPlanet) {
       this.moveShipToPlanet(ship, system.planets[0]);
     } else {
       ship.setTarget(
