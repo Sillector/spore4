@@ -1,98 +1,99 @@
 <config name="galaxy" title="Галактика">
-  <entry key="starCount" type="number" title="Количество звёзд" description="Количество звёзд, создаваемых при генерации галактики.">70</entry>
-  <entry key="radius" type="number" title="Радиус галактики" description="Радиус распределения звёзд относительно центра галактики.">120</entry>
-  <entry key="thickness" type="number" title="Толщина диска" description="Толщина диска галактики вдоль оси Y.">14</entry>
-  <entry key="rotationSpeed" type="number" title="Скорость вращения" description="Скорость вращения звёздного массива в радианах за кадр.">0.01</entry>
-  <entry key="groupTilt" type="object" title="Наклон рукавов" description="Наклон дальних и ближних рукавов для создания объёма.">
-    <entry key="far" type="number" title="Дальний наклон" description="Наклон дальних групп в градусах относительно плоскости галактики.">78</entry>
-    <entry key="near" type="number" title="Ближний наклон" description="Наклон ближних групп в градусах относительно плоскости галактики.">45</entry>
+  <entry key="starCount" type="number" description="Количество звёзд, создаваемых при генерации галактики." title="Количество звёзд">70</entry>
+  <entry key="radius" type="number" description="Радиус распределения звёзд относительно центра галактики." title="Радиус галактики">120</entry>
+  <entry key="thickness" type="number" description="Толщина диска галактики вдоль оси Y." title="Толщина диска">14</entry>
+  <entry key="rotationSpeed" type="number" description="Скорость вращения звёздного массива в радианах за кадр." title="Скорость вращения">0.01</entry>
+  <entry key="groupTilt" type="object" description="Наклон дальних и ближних рукавов для создания объёма." title="Наклон рукавов">
+    <entry key="far" type="number" description="Наклон дальних групп в градусах относительно плоскости галактики." title="Дальний наклон">78</entry>
+    <entry key="near" type="number" description="Наклон ближних групп в градусах относительно плоскости галактики." title="Ближний наклон">45</entry>
   </entry>
-  <entry key="heightRange" type="object" title="Диапазон высот" description="Параметры распределения высоты звёзд над плоскостью галактики.">
-    <entry key="base" type="number" title="Базовая высота" description="Базовое значение высоты для звёзд.">0.6</entry>
-    <entry key="thicknessFactor" type="number" title="Фактор толщины" description="Множитель, влияющий на высоту в зависимости от толщины диска.">0.17</entry>
+  <entry key="heightRange" type="object" description="Параметры распределения высоты звёзд над плоскостью галактики." title="Диапазон высот">
+    <entry key="base" type="number" description="Базовое значение высоты для звёзд." title="Базовая высота">0.6</entry>
+    <entry key="thicknessFactor" type="number" description="Множитель, влияющий на высоту в зависимости от толщины диска." title="Фактор толщины">0.17</entry>
   </entry>
-  <entry key="zoom" type="object" title="Масштаб галактики" description="Настройки масштабирования камеры в режиме галактики.">
-    <entry key="defaultProgress" type="number" title="Стартовый масштаб" description="Начальное значение шкалы приближения при открытии галактической карты.">1.7</entry>
-    <entry key="step" type="number" title="Шаг масштабирования" description="Шаг изменения масштаба за единичное действие пользователя.">0.16</entry>
-    <entry key="enterThreshold" type="number" title="Порог входа" description="Порог масштаба, при котором запускается переход в систему.">2</entry>
-    <entry key="cameraLimit" type="number" title="Предел камеры" description="Максимальное значение прогресса, влияющего на приближение камеры перед переходом в систему.">1.7</entry>
-    <entry key="damping" type="number" title="Сглаживание" description="Сила сглаживания переходов масштаба камеры.">6</entry>
+  <entry key="zoom" type="object" description="Настройки масштабирования камеры в режиме галактики." title="Масштаб галактики">
+    <entry key="defaultProgress" type="number" description="Начальное значение шкалы приближения при открытии галактической карты." title="Стартовый масштаб">1.7</entry>
+    <entry key="step" type="number" description="Шаг изменения масштаба за единичное действие пользователя." title="Шаг масштабирования">0.16</entry>
+    <entry key="enterThreshold" type="number" description="Порог масштаба, при котором запускается переход в систему." title="Порог входа">2</entry>
+    <entry key="cameraLimit" type="number" description="Максимальное значение прогресса, влияющего на приближение камеры перед переходом в систему." title="Предел камеры">1.7</entry>
+    <entry key="damping" type="number" description="Сила сглаживания переходов масштаба камеры." title="Сглаживание">6</entry>
   </entry>
-  <entry key="camera" type="object" title="Камера" description="Параметры поведения камеры при движении по галактике.">
-    <entry key="offset" type="object" title="Смещение камеры" description="Начальные и конечные смещения камеры относительно корабля.">
-      <entry key="startY" type="number" title="Начальное смещение Y" description="Вертикальное смещение камеры в начале движения.">72</entry>
-      <entry key="endY" type="number" title="Конечное смещение Y" description="Вертикальное смещение камеры при приближении к центру.">34</entry>
-      <entry key="startZ" type="number" title="Начальное смещение Z" description="Глубинное смещение камеры в начале движения.">215</entry>
-      <entry key="endZ" type="number" title="Конечное смещение Z" description="Глубинное смещение камеры при приближении к центру.">122</entry>
+  <entry key="camera" type="object" description="Параметры поведения камеры при движении по галактике." title="Камера">
+    <entry key="offset" type="object" description="Начальные и конечные смещения камеры относительно корабля." title="Смещение камеры">
+      <entry key="startY" type="number" description="Вертикальное смещение камеры в начале движения." title="Начальное смещение Y">72</entry>
+      <entry key="endY" type="number" description="Вертикальное смещение камеры при приближении к центру." title="Конечное смещение Y">34</entry>
+      <entry key="startZ" type="number" description="Глубинное смещение камеры в начале движения." title="Начальное смещение Z">215</entry>
+      <entry key="endZ" type="number" description="Глубинное смещение камеры при приближении к центру." title="Конечное смещение Z">122</entry>
     </entry>
-    <entry key="follow" type="object" title="Следование" description="Настройки сглаживания следования камеры за кораблём.">
-      <entry key="rate" type="number" title="Скорость следования" description="Скорость интерполяции камеры к цели.">4.5</entry>
-      <entry key="min" type="number" title="Минимальное сглаживание" description="Минимальный коэффициент сглаживания движения камеры.">0.05</entry>
-      <entry key="max" type="number" title="Максимальное сглаживание" description="Максимальный коэффициент сглаживания движения камеры.">0.16</entry>
+    <entry key="follow" type="object" description="Настройки сглаживания следования камеры за кораблём." title="Следование">
+      <entry key="rate" type="number" description="Скорость интерполяции камеры к цели." title="Скорость следования">4.5</entry>
+      <entry key="min" type="number" description="Минимальный коэффициент сглаживания движения камеры." title="Минимальное сглаживание">0.05</entry>
+      <entry key="max" type="number" description="Максимальный коэффициент сглаживания движения камеры." title="Максимальное сглаживание">0.16</entry>
     </entry>
   </entry>
-  <entry key="ship" type="object" title="Корабль" description="Настройки поведения корабля в галактическом режиме.">
-    <entry key="approachAltitude" type="number" title="Высота подхода" description="Высота, на которую корабль поднимается при приближении к системе.">6</entry>
+  <entry key="ship" type="object" description="Настройки поведения корабля в галактическом режиме." title="Корабль">
+    <entry key="approachAltitude" type="number" description="Высота, на которую корабль поднимается при приближении к системе." title="Высота подхода">6</entry>
   </entry>
-  <entry key="cameraBaseOffset" type="object" title="Базовое смещение камеры" description="Базовое смещение камеры при первичной загрузке сцены.">
-    <entry key="x" type="number" title="Смещение X" description="Смещение камеры по оси X.">0</entry>
-    <entry key="y" type="number" title="Смещение Y" description="Смещение камеры по оси Y.">52</entry>
-    <entry key="z" type="number" title="Смещение Z" description="Смещение камеры по оси Z.">165</entry>
+  <entry key="cameraBaseOffset" type="object" description="Базовое смещение камеры при первичной загрузке сцены." title="Базовое смещение камеры">
+    <entry key="x" type="number" description="Смещение камеры по оси X." title="Смещение X">0</entry>
+    <entry key="y" type="number" description="Смещение камеры по оси Y." title="Смещение Y">52</entry>
+    <entry key="z" type="number" description="Смещение камеры по оси Z." title="Смещение Z">165</entry>
   </entry>
-  <entry key="star" type="object" title="Звёзды" description="Параметры визуализации звёзд.">
-    <entry key="geometry" type="object" title="Геометрия" description="Настройки геометрии звёзд.">
-      <entry key="radius" type="number" title="Радиус" description="Радиус сферической геометрии звезды.">1.4</entry>
-      <entry key="widthSegments" type="number" title="Сегменты по ширине" description="Количество сегментов по ширине сферы.">24</entry>
-      <entry key="heightSegments" type="number" title="Сегменты по высоте" description="Количество сегментов по высоте сферы.">24</entry>
+  <entry key="star" type="object" description="Параметры визуализации звёзд." title="Звёзды">
+    <entry key="geometry" type="object" description="Настройки геометрии звёзд." title="Геометрия">
+      <entry key="radius" type="number" description="Радиус сферической геометрии звезды." title="Радиус">1.4</entry>
+      <entry key="widthSegments" type="number" description="Количество сегментов по ширине сферы." title="Сегменты по ширине">24</entry>
+      <entry key="heightSegments" type="number" description="Количество сегментов по высоте сферы." title="Сегменты по высоте">24</entry>
     </entry>
-    <entry key="color" type="object" title="Цвет" description="Настройки генерации цвета звёзд.">
-      <entry key="palette" type="array" title="Палитра звёзд" description="Доступные варианты оттенков звёзд.">
-        <item type="object" title="Красная звезда" description="Красная звезда">
-          <entry key="hue" type="number" title="Оттенок" description="Оттенок в модели HSL.">0.02</entry>
-          <entry key="saturation" type="number" title="Насыщенность" description="Насыщенность цвета.">0.78</entry>
-          <entry key="lightness" type="number" title="Яркость" description="Яркость цвета.">0.56</entry>
-          <entry key="emissiveMultiplier" type="number" title="Сила свечения" description="Усиление свечения.">0.8</entry>
+    <entry key="color" type="object" description="Настройки генерации цвета звёзд." title="Цвет">
+      <entry key="palette" type="array" description="Доступные варианты оттенков звёзд." title="Палитра звёзд">
+        <item type="object" description="Красная звезда" title="Красная звезда">
+          <entry key="hue" type="number" description="Оттенок в модели HSL." title="Оттенок">0.02</entry>
+          <entry key="saturation" type="number" description="Насыщенность цвета." title="Насыщенность">0.78</entry>
+          <entry key="lightness" type="number" description="Яркость цвета." title="Яркость">0.56</entry>
+          <entry key="emissiveMultiplier" type="number" description="Усиление свечения." title="Сила свечения">0.8</entry>
         </item>
-        <item type="object" title="Жёлтая звезда" description="Жёлтая звезда">
-          <entry key="hue" type="number" title="Оттенок" description="Оттенок в модели HSL.">0.12</entry>
-          <entry key="saturation" type="number" title="Насыщенность" description="Насыщенность цвета.">0.72</entry>
-          <entry key="lightness" type="number" title="Яркость" description="Яркость цвета.">0.62</entry>
-          <entry key="emissiveMultiplier" type="number" title="Сила свечения" description="Усиление свечения.">0.75</entry>
+        <item type="object" description="Жёлтая звезда" title="Жёлтая звезда">
+          <entry key="hue" type="number" description="Оттенок в модели HSL." title="Оттенок">0.12</entry>
+          <entry key="saturation" type="number" description="Насыщенность цвета." title="Насыщенность">0.72</entry>
+          <entry key="lightness" type="number" description="Яркость цвета." title="Яркость">0.62</entry>
+          <entry key="emissiveMultiplier" type="number" description="Усиление свечения." title="Сила свечения">0.75</entry>
         </item>
-        <item type="object" title="Белая звезда" description="Белая звезда">
-          <entry key="hue" type="number" title="Оттенок" description="Оттенок в модели HSL.">0</entry>
-          <entry key="saturation" type="number" title="Насыщенность" description="Насыщенность цвета.">0.04</entry>
-          <entry key="lightness" type="number" title="Яркость" description="Яркость цвета.">0.92</entry>
-          <entry key="emissiveMultiplier" type="number" title="Сила свечения" description="Усиление свечения.">0.7</entry>
+        <item type="object" description="Белая звезда" title="Белая звезда">
+          <entry key="hue" type="number" description="Оттенок в модели HSL." title="Оттенок">0</entry>
+          <entry key="saturation" type="number" description="Насыщенность цвета." title="Насыщенность">0.04</entry>
+          <entry key="lightness" type="number" description="Яркость цвета." title="Яркость">0.92</entry>
+          <entry key="emissiveMultiplier" type="number" description="Усиление свечения." title="Сила свечения">0.7</entry>
         </item>
-        <item type="object" title="Голубая звезда" description="Голубая звезда">
-          <entry key="hue" type="number" title="Оттенок" description="Оттенок в модели HSL.">0.58</entry>
-          <entry key="saturation" type="number" title="Насыщенность" description="Насыщенность цвета.">0.64</entry>
-          <entry key="lightness" type="number" title="Яркость" description="Яркость цвета.">0.68</entry>
-          <entry key="emissiveMultiplier" type="number" title="Сила свечения" description="Усиление свечения.">0.85</entry>
+        <item type="object" description="Голубая звезда" title="Голубая звезда">
+          <entry key="hue" type="number" description="Оттенок в модели HSL." title="Оттенок">0.58</entry>
+          <entry key="saturation" type="number" description="Насыщенность цвета." title="Насыщенность">0.64</entry>
+          <entry key="lightness" type="number" description="Яркость цвета." title="Яркость">0.68</entry>
+          <entry key="emissiveMultiplier" type="number" description="Усиление свечения." title="Сила свечения">0.85</entry>
         </item>
       </entry>
-      <entry key="variance" type="object" title="Разброс параметров" description="Разброс параметров оттенков.">
-        <entry key="hue" type="number" title="Отклонение оттенка" description="Допустимое отклонение оттенка.">0.015</entry>
-        <entry key="saturation" type="number" title="Отклонение насыщенности" description="Допустимое отклонение насыщенности.">0.06</entry>
-        <entry key="lightness" type="number" title="Отклонение яркости" description="Допустимое отклонение яркости.">0.05</entry>
+      <entry key="variance" type="object" description="Разброс параметров оттенков." title="Разброс параметров">
+        <entry key="hue" type="number" description="Допустимое отклонение оттенка." title="Отклонение оттенка">0.015</entry>
+        <entry key="saturation" type="number" description="Допустимое отклонение насыщенности." title="Отклонение насыщенности">0.06</entry>
+        <entry key="lightness" type="number" description="Допустимое отклонение яркости." title="Отклонение яркости">0.05</entry>
       </entry>
-      <entry key="emissiveMultiplier" type="number" title="Базовое свечение" description="Значение по умолчанию для усиления свечения.">0.7</entry>
+      <entry key="emissiveMultiplier" type="number" description="Значение по умолчанию для усиления свечения." title="Базовое свечение">0.7</entry>
     </entry>
-    <entry key="material" type="object" title="Материал" description="Параметры материала для звёзд.">
-      <entry key="emissiveIntensity" type="number" title="Интенсивность эмиссии" description="Интенсивность эмиссионного свечения материала.">1.5</entry>
-      <entry key="roughness" type="number" title="Шероховатость" description="Шероховатость материала звезды.">0.25</entry>
-      <entry key="metalness" type="number" title="Металличность" description="Металличность материала звезды.">0.1</entry>
+    <entry key="material" type="object" description="Параметры материала для звёзд." title="Материал">
+      <entry key="emissiveIntensity" type="number" description="Интенсивность эмиссионного свечения материала." title="Интенсивность эмиссии">1.5</entry>
+      <entry key="roughness" type="number" description="Шероховатость материала звезды." title="Шероховатость">0.25</entry>
+      <entry key="metalness" type="number" description="Металличность материала звезды." title="Металличность">0.1</entry>
     </entry>
-    <entry key="name" type="object" title="Названия систем" description="Настройки генерации названий звёздных систем.">
-      <entry key="prefix" type="string" title="Префикс" description="Префикс для имени звёздной системы.">Система </entry>
-      <entry key="min" type="number" title="Минимальное значение" description="Минимальное числовое значение для генерации названия.">100</entry>
-      <entry key="maxRange" type="number" title="Диапазон" description="Диапазон увеличения числовой части имени.">900</entry>
+    <entry key="name" type="object" description="Настройки генерации названий звёздных систем." title="Названия систем">
+      <entry key="prefix" type="string" description="Префикс для имени звёздной системы." title="Префикс">Система </entry>
+      <entry key="min" type="number" description="Минимальное числовое значение для генерации названия." title="Минимальное значение">100</entry>
+      <entry key="maxRange" type="number" description="Диапазон увеличения числовой части имени." title="Диапазон">900</entry>
     </entry>
-    <entry key="hover" type="object" title="Наведение" description="Параметры отображения дистанции при наведении на звезду.">
-      <entry key="lineColor" type="string" title="Цвет луча" description="Цвет луча от корабля до звезды.">#ffffff</entry>
-      <entry key="lineOpacity" type="number" title="Прозрачность луча" description="Прозрачность луча.">0.65</entry>
-      <entry key="labelOffset" type="number" title="Высота подписи" description="Высота подписи расстояния над звездой.">6</entry>
+    <entry key="hover" type="object" description="Параметры отображения дистанции при наведении на звезду." title="Наведение">
+      <entry key="lineColor" type="string" description="Цвет луча от корабля до звезды." title="Цвет луча">#ffffff</entry>
+      <entry key="lineOpacity" type="number" description="Прозрачность луча." title="Прозрачность луча">0.65</entry>
+      <entry key="labelOffset" type="number" description="Высота подписи расстояния над звездой." title="Высота подписи">6</entry>
     </entry>
   </entry>
 </config>
+
