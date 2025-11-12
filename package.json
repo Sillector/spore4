@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "fast-xml-parser": "^4.4.1",
     "three": "^0.161.0"
   },
   "devDependencies": {

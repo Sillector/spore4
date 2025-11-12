@@ -45,3 +45,222 @@ body {
 canvas {
   display: block;
 }
+
+.dev-panel__toggle {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 2000;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 180, 255, 0.4);
+  background: rgba(15, 25, 45, 0.85);
+  color: #e0f2ff;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.dev-panel__toggle:hover {
+  background: rgba(30, 50, 90, 0.9);
+  transform: translateY(-1px);
+}
+
+.dev-panel {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: min(420px, 90vw);
+  max-height: calc(100vh - 2rem);
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(120, 180, 255, 0.35);
+  background: rgba(5, 12, 25, 0.85);
+  color: #e8f3ff;
+  box-shadow: 0 1.5rem 3rem rgba(5, 20, 60, 0.35);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(-1rem);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  z-index: 1999;
+}
+
+.dev-panel--open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dev-panel__title {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dev-panel__content {
+  margin-top: 0.75rem;
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  gap: 0.75rem;
+  padding-right: 0.5rem;
+  overscroll-behavior: contain;
+}
+
+.dev-panel__section {
+  border-top: 1px solid rgba(120, 180, 255, 0.2);
+  padding-top: 0.75rem;
+}
+
+.dev-panel__section:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.dev-panel__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dev-panel__section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dev-panel__section-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.dev-panel__save {
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(120, 180, 255, 0.35);
+  background: rgba(20, 40, 70, 0.85);
+  color: #e0f2ff;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dev-panel__save:hover {
+  background: rgba(40, 70, 120, 0.9);
+}
+
+.dev-panel__section-body {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.dev-panel__section--collapsed .dev-panel__section-body {
+  display: none;
+}
+
+.dev-panel__collapse {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(120, 180, 255, 0.25);
+  background: rgba(15, 25, 45, 0.65);
+  color: #e0f2ff;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.dev-panel__collapse:hover {
+  background: rgba(35, 55, 90, 0.8);
+}
+
+.dev-panel__section--collapsed .dev-panel__collapse {
+  transform: rotate(-90deg);
+}
+
+.dev-panel__group {
+  border: 1px solid rgba(120, 180, 255, 0.15);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(10, 20, 35, 0.6);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dev-panel__group-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(200, 220, 255, 0.75);
+}
+
+.dev-panel__group-content {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dev-panel__field {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.dev-panel__field-label {
+  color: rgba(220, 235, 255, 0.8);
+  letter-spacing: 0.02em;
+}
+
+.dev-panel__input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(120, 180, 255, 0.25);
+  background: rgba(8, 18, 32, 0.8);
+  color: #e0f2ff;
+  font-size: 0.8rem;
+}
+
+.dev-panel__input:focus {
+  outline: none;
+  border-color: rgba(140, 200, 255, 0.6);
+  box-shadow: 0 0 0 2px rgba(120, 180, 255, 0.25);
+}
+
+.dev-panel__checkbox {
+  justify-self: start;
+  width: 1rem;
+  height: 1rem;
+}
+
+.dev-panel__status {
+  min-height: 1.25rem;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  color: rgba(220, 235, 255, 0.75);
+}
+
+.dev-panel__status[data-state='error'] {
+  color: #ff8a9f;
+}
+
+.dev-panel__status[data-state='success'] {
+  color: #8df8d0;
+}

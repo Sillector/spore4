@@ -1,14 +1,9 @@
 import * as THREE from 'three';
-import {
-  STAR_COUNT,
-  GALAXY_RADIUS,
-  GALAXY_THICKNESS,
-  GALAXY_ZOOM_STEP,
-  GALAXY_ENTER_THRESHOLD,
-  SHIP_SPEED
-} from './constants.js';
+import { getConfig } from '../config/store.js';
 import { createFollowTarget } from './targets.js';
 
+const galaxyConfig = getConfig('galaxy');
+const shipConfig = getConfig('ship');
 const cameraOffset = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
 
@@ -16,8 +11,9 @@ export class GalaxyView {
   constructor(scene, state) {
     this.scene = scene;
     this.state = state;
+    this.config = galaxyConfig;
     this.group = new THREE.Group();
-    this.group.rotation.x = THREE.MathUtils.degToRad(78);
+    this.group.rotation.x = THREE.MathUtils.degToRad(this.config.groupTilt.far);
     this.group.name = 'Galaxy';
     this.scene.add(this.group);
     this.populateStars();
@@ -26,12 +22,16 @@ export class GalaxyView {
   populateStars() {
     const temp = new THREE.Vector3();
     this.state.galaxyStars.length = 0;
-    for (let i = 0; i < STAR_COUNT; i += 1) {
+    for (let i = 0; i < this.config.starCount; i += 1) {
       const star = this.createStar();
-      const radius = Math.sqrt(Math.random()) * GALAXY_RADIUS;
+      const radius = Math.sqrt(Math.random()) * this.config.radius;
       const theta = Math.random() * Math.PI * 2;
-      const distanceFactor = 1 - radius / GALAXY_RADIUS;
-      const heightRange = THREE.MathUtils.lerp(0.6, GALAXY_THICKNESS * 0.17, distanceFactor);
+      const distanceFactor = 1 - radius / this.config.radius;
+      const heightRange = THREE.MathUtils.lerp(
+        this.config.heightRange.base,
+        this.config.thickness * this.config.heightRange.thicknessFactor,
+        distanceFactor
+      );
       const y = THREE.MathUtils.randFloatSpread(heightRange);
       temp.set(Math.cos(theta) * radius, y, Math.sin(theta) * radius);
       star.position.copy(temp);
@@ -43,20 +43,30 @@ export class GalaxyView {
   }
 
   createStar() {
-    const color = new THREE.Color().setHSL(0.55 + Math.random() * 0.15, 0.8, 0.6);
-    const geometry = new THREE.SphereGeometry(1.4, 24, 24);
+    const color = new THREE.Color().setHSL(
+      this.config.star.color.hueBase + Math.random() * this.config.star.color.hueVariance,
+      this.config.star.color.saturation,
+      this.config.star.color.lightness
+    );
+    const geometry = new THREE.SphereGeometry(
+      this.config.star.geometry.radius,
+      this.config.star.geometry.widthSegments,
+      this.config.star.geometry.heightSegments
+    );
     const material = new THREE.MeshStandardMaterial({
       color,
-      emissive: color.clone().multiplyScalar(0.6),
-      emissiveIntensity: 1.5,
-      roughness: 0.25,
-      metalness: 0.1
+      emissive: color.clone().multiplyScalar(this.config.star.color.emissiveMultiplier),
+      emissiveIntensity: this.config.star.material.emissiveIntensity,
+      roughness: this.config.star.material.roughness,
+      metalness: this.config.star.material.metalness
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.userData = {
-      name: `Система ${Math.floor(Math.random() * 900 + 100)}`,
+      name: `${this.config.star.name.prefix}${Math.floor(
+        Math.random() * this.config.star.name.maxRange + this.config.star.name.min
+      )}`,
       color,
       mesh
     };
@@ -81,25 +91,25 @@ export class GalaxyView {
 
   moveShipToStar(ship, starData) {
     this.state.currentStar = starData;
-    ship.setTarget(createFollowTarget(starData.mesh, 6));
-    ship.setSpeed(SHIP_SPEED);
+    ship.setTarget(createFollowTarget(starData.mesh, this.config.ship.approachAltitude));
+    ship.setSpeed(shipConfig.speeds.galaxy);
     this.state.resetZoom('galaxy');
   }
 
   handleZoom(direction) {
     if (direction > 0 && this.state.currentStar) {
       this.state.zoomProgress.galaxy = Math.min(
-        GALAXY_ENTER_THRESHOLD,
-        this.state.zoomProgress.galaxy + GALAXY_ZOOM_STEP
+        this.config.zoom.enterThreshold,
+        this.state.zoomProgress.galaxy + this.config.zoom.step
       );
-      if (this.state.zoomProgress.galaxy >= GALAXY_ENTER_THRESHOLD) {
+      if (this.state.zoomProgress.galaxy >= this.config.zoom.enterThreshold) {
         this.state.zoomProgress.galaxy = 0;
         return true;
       }
     } else if (direction < 0) {
       this.state.zoomProgress.galaxy = Math.max(
         0,
-        this.state.zoomProgress.galaxy - GALAXY_ZOOM_STEP
+        this.state.zoomProgress.galaxy - this.config.zoom.step
       );
     }
     return false;
@@ -110,24 +120,36 @@ export class GalaxyView {
   }
 
   update(delta, ship, camera) {
-    this.group.rotation.y += delta * 0.01;
+    this.group.rotation.y += delta * this.config.rotationSpeed;
     const targetZoom = Math.min(this.state.zoomProgress.galaxy, 1);
     this.state.zoomSmooth.galaxy = THREE.MathUtils.damp(
       this.state.zoomSmooth.galaxy,
       targetZoom,
-      6,
+      this.config.zoom.damping,
       delta
     );
     const zoom = this.state.zoomSmooth.galaxy;
-    const targetY = THREE.MathUtils.lerp(72, 34, zoom);
-    const targetZ = THREE.MathUtils.lerp(215, 122, zoom);
+    const targetY = THREE.MathUtils.lerp(
+      this.config.camera.offset.startY,
+      this.config.camera.offset.endY,
+      zoom
+    );
+    const targetZ = THREE.MathUtils.lerp(
+      this.config.camera.offset.startZ,
+      this.config.camera.offset.endZ,
+      zoom
+    );
     cameraOffset.set(0, targetY, targetZ);
     cameraTarget.copy(ship.position).add(cameraOffset);
-    const followAlpha = THREE.MathUtils.clamp(delta * 4.5, 0.05, 0.16);
+    const followAlpha = THREE.MathUtils.clamp(
+      delta * this.config.camera.follow.rate,
+      this.config.camera.follow.min,
+      this.config.camera.follow.max
+    );
     camera.position.lerp(cameraTarget, followAlpha);
     camera.lookAt(ship.position);
-    const topTilt = THREE.MathUtils.degToRad(78);
-    const closeTilt = THREE.MathUtils.degToRad(45);
+    const topTilt = THREE.MathUtils.degToRad(this.config.groupTilt.far);
+    const closeTilt = THREE.MathUtils.degToRad(this.config.groupTilt.near);
     this.group.rotation.x = THREE.MathUtils.lerp(topTilt, closeTilt, zoom);
   }
 

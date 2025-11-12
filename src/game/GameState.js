@@ -1,4 +1,6 @@
-import { ORBIT_RADIUS_MIN, ORBIT_RADIUS_MAX } from './constants.js';
+import { getConfig } from '../config/store.js';
+
+const orbitConfig = getConfig('orbit');
 
 export class GameState {
   constructor() {
@@ -17,9 +19,9 @@ export class GameState {
       system: 0
     };
     this.orbitMotion = {
-      theta: Math.PI / 2,
-      phi: 0,
-      radius: 22,
+      theta: (orbitConfig.initialAngles.theta * Math.PI) / 180,
+      phi: (orbitConfig.initialAngles.phi * Math.PI) / 180,
+      radius: orbitConfig.radius.initial,
       velocityTheta: 0,
       velocityPhi: 0
     };
@@ -40,10 +42,10 @@ export class GameState {
   resetOrbitMotion() {
     this.orbitMotion.theta = Math.PI / 2;
     this.orbitMotion.phi = 0;
-    const baseRadius = 25;
+    const baseRadius = orbitConfig.radius.base;
     this.orbitMotion.radius = Math.min(
-      Math.max(baseRadius, ORBIT_RADIUS_MIN),
-      ORBIT_RADIUS_MAX
+      Math.max(baseRadius, orbitConfig.radius.min),
+      orbitConfig.radius.max
     );
     this.orbitZoomBuffer = 0;
   }

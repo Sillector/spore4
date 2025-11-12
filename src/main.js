@@ -1,4 +1,5 @@
 import { createSpaceGame } from './spaceGame.js';
+import { setupConfigPanel } from './devtools/configPanel.js';
 
 const app = document.getElementById('app');
 const info = document.createElement('section');
@@ -12,3 +13,4 @@ info.innerHTML = `
 app.appendChild(info);
 
 createSpaceGame(app);
+setupConfigPanel();

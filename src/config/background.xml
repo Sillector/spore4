@@ -1,0 +1,15 @@
+<config name="background">
+  <entry key="starCount" type="number" description="Количество фоновых звёзд, используемых для заполнения сцены.">2000</entry>
+  <entry key="radius" type="number" description="Радиус сферы, в пределах которой распределяются фоновые звёзды.">600</entry>
+  <entry key="color" type="object" description="Настройки оттенка и яркости фоновых звёзд.">
+    <entry key="hueBase" type="number" description="Базовый оттенок фоновых звёзд.">0.55</entry>
+    <entry key="hueVariance" type="number" description="Максимальное отклонение оттенка для фоновых звёзд.">0.08</entry>
+    <entry key="saturation" type="number" description="Насыщенность цвета фоновых звёзд.">0.55</entry>
+    <entry key="lightnessBase" type="number" description="Базовая яркость фоновых звёзд.">0.26</entry>
+    <entry key="lightnessVariance" type="number" description="Диапазон вариации яркости фоновых звёзд.">0.12</entry>
+  </entry>
+  <entry key="material" type="object" description="Параметры материала для частиц фоновых звёзд.">
+    <entry key="size" type="number" description="Размер точек, используемых для отображения звёзд.">0.9</entry>
+    <entry key="opacity" type="number" description="Прозрачность фоновых звёзд.">0.38</entry>
+  </entry>
+</config>

@@ -1,5 +1,8 @@
 import * as THREE from 'three';
+import { getConfig } from '../config/store.js';
 import { resolveTargetPosition } from './targets.js';
+
+const shipConfig = getConfig('ship');
 
 const tempDirection = new THREE.Vector3();
 const lookTarget = new THREE.Vector3();
@@ -52,13 +55,17 @@ export class ShipController {
 
     const isFollow = this.target.type === 'follow';
     if (isFollow) {
-      const followAlpha = THREE.MathUtils.clamp(delta * 8, 0.08, 0.55);
+      const followAlpha = THREE.MathUtils.clamp(
+        delta * shipConfig.movement.follow.rate,
+        shipConfig.movement.follow.min,
+        shipConfig.movement.follow.max
+      );
       this.ship.position.lerp(targetPosition, followAlpha);
     } else {
       tempDirection.copy(targetPosition).sub(this.ship.position);
       const distance = tempDirection.length();
       const moveSpeed = this.speed * delta;
-      if (distance > 0.05) {
+      if (distance > shipConfig.movement.arrivalThreshold) {
         tempDirection.normalize();
         this.ship.position.addScaledVector(tempDirection, Math.min(moveSpeed, distance));
       } else {
@@ -93,28 +100,39 @@ export class ShipController {
   }
 
   createShip() {
-    const geometry = new THREE.ConeGeometry(0.7, 2.2, 12);
+    const geometry = new THREE.ConeGeometry(
+      shipConfig.geometry.radius,
+      shipConfig.geometry.height,
+      shipConfig.geometry.radialSegments
+    );
     const material = new THREE.MeshStandardMaterial({
-      color: 0xffdd55,
-      roughness: 0.3,
-      metalness: 0.4,
-      emissive: 0x332200,
-      emissiveIntensity: 0.6
+      color: new THREE.Color(shipConfig.material.color),
+      roughness: shipConfig.material.roughness,
+      metalness: shipConfig.material.metalness,
+      emissive: new THREE.Color(shipConfig.material.emissive),
+      emissiveIntensity: shipConfig.material.emissiveIntensity
     });
     const ship = new THREE.Mesh(geometry, material);
-    ship.rotateX(Math.PI / 2);
+    ship.rotateX((shipConfig.rotation.x * Math.PI) / 180);
     ship.castShadow = true;
 
-    const trailGeometry = new THREE.CylinderGeometry(0.2, 0.0, 1.6, 8, 1, true);
+    const trailGeometry = new THREE.CylinderGeometry(
+      shipConfig.trail.radiusTop,
+      shipConfig.trail.radiusBottom,
+      shipConfig.trail.height,
+      shipConfig.trail.radialSegments,
+      1,
+      shipConfig.trail.openEnded
+    );
     const trailMaterial = new THREE.MeshBasicMaterial({
-      color: 0x77c6ff,
+      color: new THREE.Color(shipConfig.trail.color),
       transparent: true,
-      opacity: 0.55,
+      opacity: shipConfig.trail.opacity,
       side: THREE.DoubleSide
     });
     const trail = new THREE.Mesh(trailGeometry, trailMaterial);
-    trail.rotateX(Math.PI / 2);
-    trail.position.z = -0.8;
+    trail.rotateX((shipConfig.rotation.x * Math.PI) / 180);
+    trail.position.z = shipConfig.trail.offsetZ;
     ship.add(trail);
 
     return ship;

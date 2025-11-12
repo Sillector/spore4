@@ -1,0 +1,64 @@
+<config name="orbit">
+  <entry key="radius" type="object" description="Диапазон и базовые значения орбиты планеты.">
+    <entry key="min" type="number" description="Минимально допустимый радиус орбиты.">20</entry>
+    <entry key="max" type="number" description="Максимально допустимый радиус орбиты.">40</entry>
+    <entry key="base" type="number" description="Базовый радиус, используемый для генерации.">25</entry>
+    <entry key="initial" type="number" description="Начальный радиус орбиты при входе в режим.">22</entry>
+  </entry>
+  <entry key="zoom" type="object" description="Настройки масштабирования камеры вокруг планеты.">
+    <entry key="step" type="object" description="Шаги изменения масштаба при отдалении и приближении.">
+      <entry key="min" type="number" description="Минимальный шаг масштабирования.">1.2</entry>
+      <entry key="max" type="number" description="Максимальный шаг масштабирования.">3.6</entry>
+    </entry>
+    <entry key="bufferIncrement" type="number" description="Скорость накопления буфера масштабирования.">0.25</entry>
+    <entry key="bufferMagnitudeMultiplier" type="number" description="Множитель, влияющий на силу буфера масштабирования.">0.35</entry>
+    <entry key="bufferDecrement" type="number" description="Скорость уменьшения буфера масштабирования при бездействии.">0.2</entry>
+    <entry key="radiusExitThreshold" type="number" description="Относительный порог радиуса для выхода из режима орбиты.">0.5</entry>
+  </entry>
+  <entry key="camera" type="object" description="Параметры камеры в орбитальном режиме.">
+    <entry key="offsetY" type="object" description="Диапазон вертикального смещения камеры.">
+      <entry key="min" type="number" description="Минимальное значение смещения камеры по оси Y.">6</entry>
+      <entry key="max" type="number" description="Максимальное значение смещения камеры по оси Y.">14</entry>
+    </entry>
+    <entry key="offsetZ" type="object" description="Диапазон смещения камеры по глубине.">
+      <entry key="min" type="number" description="Минимальное значение смещения камеры по оси Z.">10</entry>
+      <entry key="max" type="number" description="Максимальное значение смещения камеры по оси Z.">26</entry>
+    </entry>
+    <entry key="follow" type="object" description="Настройки следования камеры за кораблём на орбите.">
+      <entry key="rate" type="number" description="Скорость догоняющей интерполяции камеры.">5</entry>
+      <entry key="min" type="number" description="Минимальный коэффициент сглаживания.">0.05</entry>
+      <entry key="max" type="number" description="Максимальный коэффициент сглаживания.">0.2</entry>
+    </entry>
+    <entry key="entryPosition" type="object" description="Позиция камеры при входе в режим орбиты.">
+      <entry key="x" type="number" description="Координата камеры по оси X при входе.">0</entry>
+      <entry key="y" type="number" description="Координата камеры по оси Y при входе.">0</entry>
+      <entry key="z" type="number" description="Координата камеры по оси Z при входе.">48</entry>
+    </entry>
+  </entry>
+  <entry key="controls" type="object" description="Чувствительность управления орбитой.">
+    <entry key="thetaSpeed" type="number" description="Скорость вращения по горизонтальной оси (theta).">0.6</entry>
+    <entry key="phiSpeed" type="number" description="Скорость вращения по вертикальной оси (phi).">0.7</entry>
+    <entry key="thetaClamp" type="number" description="Максимальный наклон по горизонтальной оси.">0.2</entry>
+  </entry>
+  <entry key="initialAngles" type="object" description="Стартовые углы камеры при переходе на орбиту.">
+    <entry key="theta" type="number" description="Начальный угол theta в градусах.">90</entry>
+    <entry key="phi" type="number" description="Начальный угол phi в градусах.">0</entry>
+  </entry>
+  <entry key="surface" type="object" description="Параметры поверхности планеты.">
+    <entry key="radius" type="number" description="Радиус сферической поверхности планеты.">18</entry>
+    <entry key="widthSegments" type="number" description="Количество сегментов по ширине для геометрии поверхности.">64</entry>
+    <entry key="heightSegments" type="number" description="Количество сегментов по высоте для геометрии поверхности.">64</entry>
+    <entry key="material" type="object" description="Материал поверхности планеты.">
+      <entry key="roughness" type="number" description="Шероховатость материала поверхности.">1</entry>
+      <entry key="metalness" type="number" description="Металличность материала поверхности.">0.05</entry>
+    </entry>
+  </entry>
+  <entry key="atmosphere" type="object" description="Настройки визуализации атмосферы планеты.">
+    <entry key="radius" type="number" description="Радиус оболочки атмосферы.">18.5</entry>
+    <entry key="widthSegments" type="number" description="Количество сегментов по ширине для атмосферы.">48</entry>
+    <entry key="heightSegments" type="number" description="Количество сегментов по высоте для атмосферы.">48</entry>
+    <entry key="opacity" type="number" description="Прозрачность атмосферного слоя.">0.25</entry>
+    <entry key="saturationOffset" type="number" description="Коррекция насыщенности цвета атмосферы.">-0.1</entry>
+    <entry key="lightnessOffset" type="number" description="Коррекция яркости атмосферы.">0.2</entry>
+  </entry>
+</config>

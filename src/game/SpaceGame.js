@@ -6,31 +6,37 @@ import { OrbitController } from './OrbitController.js';
 import { ShipController } from './ShipController.js';
 import { createBackgroundNebula } from './background.js';
 import { createFollowTarget, createPointTarget } from './targets.js';
-import {
-  GALAXY_BASE_OFFSET,
-  SHIP_SPEED,
-  SYSTEM_SPEED
-} from './constants.js';
+import { getConfig } from '../config/store.js';
+
+const sceneConfig = getConfig('scene');
+const galaxyConfig = getConfig('galaxy');
+const shipConfig = getConfig('ship');
 
 export class SpaceGame {
   constructor(container) {
     this.container = container;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer = new THREE.WebGLRenderer({ antialias: sceneConfig.renderer.antialias });
+    this.renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio, sceneConfig.renderer.pixelRatioMax)
+    );
     this.renderer.setSize(container.clientWidth, container.clientHeight);
     this.renderer.shadowMap.enabled = true;
     this.container.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x02040a);
+    this.scene.background = new THREE.Color(sceneConfig.scene.backgroundColor);
 
     this.camera = new THREE.PerspectiveCamera(
-      60,
+      sceneConfig.camera.fov,
       container.clientWidth / container.clientHeight,
-      0.1,
-      1000
+      sceneConfig.camera.near,
+      sceneConfig.camera.far
     );
-    this.camera.position.set(0, 52, 165);
+    this.camera.position.set(
+      sceneConfig.camera.initialPosition.x,
+      sceneConfig.camera.initialPosition.y,
+      sceneConfig.camera.initialPosition.z
+    );
 
     this.state = new GameState();
     this.pointer = new THREE.Vector2();
@@ -43,9 +49,9 @@ export class SpaceGame {
     this.orbitController = new OrbitController(this.scene, this.state);
 
     this.cameraBaseOffset = new THREE.Vector3(
-      GALAXY_BASE_OFFSET.x,
-      GALAXY_BASE_OFFSET.y,
-      GALAXY_BASE_OFFSET.z
+      galaxyConfig.cameraBaseOffset.x,
+      galaxyConfig.cameraBaseOffset.y,
+      galaxyConfig.cameraBaseOffset.z
     );
 
     this.resizeObserver = new ResizeObserver(() => this.handleResize());
@@ -61,11 +67,21 @@ export class SpaceGame {
   }
 
   setupLights() {
-    const ambient = new THREE.AmbientLight(0x6f83ff, 0.35);
+    const ambient = new THREE.AmbientLight(
+      new THREE.Color(sceneConfig.lights.ambient.color),
+      sceneConfig.lights.ambient.intensity
+    );
     this.scene.add(ambient);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
-    dirLight.position.set(50, 80, 40);
+    const dirLight = new THREE.DirectionalLight(
+      new THREE.Color(sceneConfig.lights.directional.color),
+      sceneConfig.lights.directional.intensity
+    );
+    dirLight.position.set(
+      sceneConfig.lights.directional.position.x,
+      sceneConfig.lights.directional.position.y,
+      sceneConfig.lights.directional.position.z
+    );
     dirLight.castShadow = true;
     this.scene.add(dirLight);
   }
@@ -128,7 +144,10 @@ export class SpaceGame {
         this.returnToGalaxy();
       }
     } else if (this.state.level === 'orbit') {
-      const magnitude = Math.min(Math.abs(event.deltaY) / 140, 1);
+      const magnitude = Math.min(
+        Math.abs(event.deltaY) / sceneConfig.input.orbitWheelScale,
+        1
+      );
       const shouldExitOrbit = this.orbitController.handleZoom(direction, magnitude);
       if (shouldExitOrbit) {
         this.exitOrbit();
@@ -168,10 +187,13 @@ export class SpaceGame {
     this.orbitController.exit(this.ship, null);
     this.galaxyView.setVisible(true);
     const target = this.state.currentStar
-      ? createFollowTarget(this.state.currentStar.mesh, 6)
+      ? createFollowTarget(
+          this.state.currentStar.mesh,
+          galaxyConfig.ship.approachAltitude
+        )
       : createPointTarget(new THREE.Vector3());
     this.ship.setTarget(target);
-    this.ship.setSpeed(SHIP_SPEED);
+    this.ship.setSpeed(shipConfig.speeds.galaxy);
     this.ship.snapToTarget();
     this.camera.position.copy(this.ship.position).add(this.cameraBaseOffset);
     this.camera.lookAt(this.ship.position);
