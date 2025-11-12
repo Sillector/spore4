@@ -30,6 +30,10 @@ export class GameState {
       galaxy: Math.min(this.zoomDefaults.galaxy / this.zoomLimits.galaxy, 1),
       system: this.zoomDefaults.system
     };
+    this.zoomSnap = {
+      galaxy: true,
+      system: true
+    };
     this.orbitMotion = {
       theta: (orbitConfig.initialAngles.theta * Math.PI) / 180,
       phi: (orbitConfig.initialAngles.phi * Math.PI) / 180,
@@ -47,10 +51,12 @@ export class GameState {
         this.zoomDefaults.galaxy / this.zoomLimits.galaxy,
         1
       );
+      this.zoomSnap.galaxy = true;
     }
     if (!level || level === 'system') {
       this.zoomProgress.system = this.zoomDefaults.system;
       this.zoomSmooth.system = this.zoomDefaults.system;
+      this.zoomSnap.system = true;
     }
   }
 
