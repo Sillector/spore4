@@ -54,6 +54,8 @@ export class SpaceGame {
       galaxyConfig.cameraBaseOffset.z
     );
 
+    this.hoveredStar = null;
+
     this.resizeObserver = new ResizeObserver(() => this.handleResize());
     this.resizeObserver.observe(this.container);
 
@@ -98,12 +100,14 @@ export class SpaceGame {
   bindEvents() {
     this.boundPointerMove = this.onPointerMove.bind(this);
     this.boundPointerDown = this.onPointerDown.bind(this);
+    this.boundPointerLeave = this.onPointerLeave.bind(this);
     this.boundWheel = this.onWheel.bind(this);
     this.boundKeyDown = (event) => this.onKeyChange(event);
     this.boundKeyUp = (event) => this.onKeyChange(event);
 
     this.renderer.domElement.addEventListener('pointermove', this.boundPointerMove);
     this.renderer.domElement.addEventListener('pointerdown', this.boundPointerDown);
+    this.renderer.domElement.addEventListener('pointerleave', this.boundPointerLeave);
     window.addEventListener('wheel', this.boundWheel, { passive: false });
     window.addEventListener('keydown', this.boundKeyDown);
     window.addEventListener('keyup', this.boundKeyUp);
@@ -113,6 +117,7 @@ export class SpaceGame {
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    this.updateHoverSelection();
   }
 
   onPointerDown(event) {
@@ -125,6 +130,12 @@ export class SpaceGame {
     } else if (this.state.level === 'system') {
       this.systemView.moveShipToPlanet(this.ship, first.userData);
     }
+  }
+
+  onPointerLeave() {
+    this.pointer.set(0, 0);
+    this.hoveredStar = null;
+    this.galaxyView.setHoveredStar(null);
   }
 
   onWheel(event) {
@@ -177,6 +188,8 @@ export class SpaceGame {
   enterSystem(starData) {
     if (!starData) return;
     this.state.level = 'transition';
+    this.hoveredStar = null;
+    this.galaxyView.setHoveredStar(null);
     this.galaxyView.setVisible(false);
     this.orbitController.exit(this.ship, null);
     this.systemView.enter(starData, this.ship, this.camera);
@@ -199,6 +212,7 @@ export class SpaceGame {
     this.camera.lookAt(this.ship.position);
     this.state.level = 'galaxy';
     this.state.resetZoom();
+    this.updateHoverSelection();
   }
 
   enterOrbit(planetData) {
@@ -234,6 +248,21 @@ export class SpaceGame {
     requestAnimationFrame(this.animate);
   }
 
+  updateHoverSelection() {
+    if (this.state.level !== 'galaxy') {
+      this.hoveredStar = null;
+      this.galaxyView.setHoveredStar(null);
+      return;
+    }
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    const intersects = this.galaxyView.pick(this.raycaster);
+    const starData = intersects.length ? intersects[0].object.userData : null;
+    if (starData !== this.hoveredStar) {
+      this.hoveredStar = starData;
+      this.galaxyView.setHoveredStar(starData);
+    }
+  }
+
   dispose() {
     this.resizeObserver.disconnect();
     this.renderer.dispose();
@@ -244,6 +273,9 @@ export class SpaceGame {
     }
     if (this.boundPointerDown) {
       this.renderer.domElement.removeEventListener('pointerdown', this.boundPointerDown);
+    }
+    if (this.boundPointerLeave) {
+      this.renderer.domElement.removeEventListener('pointerleave', this.boundPointerLeave);
     }
     if (this.boundWheel) {
       window.removeEventListener('wheel', this.boundWheel);
