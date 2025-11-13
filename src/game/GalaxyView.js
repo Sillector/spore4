@@ -31,6 +31,12 @@ export class GalaxyView {
     const temp = new THREE.Vector3();
     this.state.galaxyStars.length = 0;
 
+    // Параметры ограничения минимальной дистанции между звёздами
+    const placement = this.config.placement || {};
+    const minDistance = Math.max(0, Number(placement.minDistance ?? 0));
+    const minDistanceSq = minDistance * minDistance;
+    const maxAttempts = Math.max(1, Math.floor(placement.maxAttempts ?? 12));
+
     // Параметры спиральной генерации с безопасными значениями по умолчанию
     const spiral = this.config.spiral || {};
     const spiralEnabled = spiral.enabled !== false; // по умолчанию включено
@@ -50,47 +56,90 @@ export class GalaxyView {
       1
     ); // длина рукава как доля от радиуса
 
-    for (let i = 0; i < this.config.starCount; i += 1) {
+    // Ядро галактики: область случайной генерации без спирали
+    const core = this.config.core || {};
+    const R = this.config.radius;
+    const coreRadius = (() => {
+      if (Number.isFinite(core.radius) && core.radius > 0) return THREE.MathUtils.clamp(core.radius, 0, R);
+      if (Number.isFinite(core.radiusFactor) && core.radiusFactor > 0) return THREE.MathUtils.clamp(core.radiusFactor, 0, 1) * R;
+      return 0;
+    })();
+    const coreFraction = THREE.MathUtils.clamp(
+      Number.isFinite(core.fraction) ? core.fraction : (Number.isFinite(core.share) ? core.share : 0),
+      0,
+      1
+    ); // доля звёзд, которые должны оказаться в ядре (0..1)
+
+    const total = Math.max(0, this.config.starCount | 0);
+    const coreCount = coreRadius > 0 ? Math.round(total * coreFraction) : 0;
+    const outerCount = Math.max(0, total - coreCount);
+
+    const isFarEnough = (p) => {
+      if (minDistance <= 0) return true;
+      for (let j = 0; j < this.state.galaxyStars.length; j += 1) {
+        const other = this.state.galaxyStars[j].position;
+        if (other && p.distanceToSquared(other) < minDistanceSq) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    let placedTotal = 0;
+    const placeStar = (i, mode) => {
+      // mode: 'core' | 'outer'
       const starKey = createSeedKey('star', i);
       const starRandom = createWorldRandom('galaxy', starKey);
-      const starMesh = createStarMesh('galaxy', starRandom);
+      let radius = 0, theta = 0, y = 0;
 
-      let radius, theta;
-      const R = this.config.radius;
+      // Пытаемся найти позицию, удовлетворяющую мин. расстоянию
+      let attempts = 0;
+      let ok = false;
+      while (attempts < maxAttempts && !ok) {
+        attempts += 1;
+        if (spiralEnabled && mode === 'outer') {
+          // Радиус в диапазоне [coreRadius..R] с учётом плотности
+          const u = starRandom.next();
+          const rNLocal = Math.pow(u, Math.max(1e-6, radialPower)); // [0..1]
+          const r = coreRadius + rNLocal * (R - coreRadius);
+          const rN = r / R;
+          const armIndex = Math.floor(starRandom.next() * arms);
+          const armAngle = (armIndex / arms) * Math.PI * 2 + armOffset;
+          const thetaSpiral = armAngle + rN * twistRad;
+          const thetaNoise = starRandom.floatSpread(armSpread);
+          const thetaSpiralNoisy = thetaSpiral + thetaNoise;
+          const randAngle = starRandom.float(0, Math.PI * 2);
+          const blend = THREE.MathUtils.smoothstep(rN, armLength, 1);
+          theta = THREE.MathUtils.lerp(thetaSpiralNoisy, randAngle, blend);
+          const jitterScale = jitterRelative ? r : R;
+          const rJitter = starRandom.floatSpread(radiusJitterRatio * jitterScale);
+          radius = THREE.MathUtils.clamp(r + rJitter, coreRadius, R);
+        } else {
+          // Ядро или отключена спираль — равномерный диск внутри соответствующего радиуса
+          if (mode === 'core') {
+            const base = Math.sqrt(starRandom.next());
+            radius = base * coreRadius;
+          } else {
+            // Внешняя область при выключенной спирали: равномерно в кольце [coreRadius..R]
+            const base = Math.sqrt(starRandom.next());
+            radius = coreRadius + base * (R - coreRadius);
+          }
+          theta = starRandom.float(0, Math.PI * 2);
+        }
 
-      if (spiralEnabled) {
-        // радиус с заданной степенной плотностью
-        const base = starRandom.next();
-        const r = Math.pow(base, Math.max(1e-6, radialPower)) * R;
-        const rN = r / R;
-        const armIndex = Math.floor(starRandom.next() * arms);
-        const armAngle = (armIndex / arms) * Math.PI * 2 + armOffset;
-        const thetaSpiral = armAngle + rN * twistRad;
-        const thetaNoise = starRandom.floatSpread(armSpread);
-        const thetaSpiralNoisy = thetaSpiral + thetaNoise;
-        const randAngle = starRandom.float(0, Math.PI * 2);
-        // Плавно смешиваем в случайный диск после armLength, чтобы задать конечную длину рукава
-        const blend = THREE.MathUtils.smoothstep(rN, armLength, 1);
-        theta = THREE.MathUtils.lerp(thetaSpiralNoisy, randAngle, blend);
-        // масштабируем разброс по радиусу: ближе к центру — меньше, к краю — больше
-        const jitterScale = jitterRelative ? r : R;
-        const rJitter = starRandom.floatSpread(radiusJitterRatio * jitterScale);
-        radius = THREE.MathUtils.clamp(r + rJitter, 0, R);
-      } else {
-        // равномерный диск (старый способ)
-        radius = Math.sqrt(starRandom.next()) * R;
-        theta = starRandom.float(0, Math.PI * 2);
+        const distanceFactor = 1 - radius / R;
+        const heightRange = THREE.MathUtils.lerp(
+          this.config.heightRange.base,
+          this.config.thickness * this.config.heightRange.thicknessFactor,
+          distanceFactor
+        );
+        y = starRandom.floatSpread(heightRange);
+
+        temp.set(Math.cos(theta) * radius, y, Math.sin(theta) * radius);
+        ok = isFarEnough(temp);
       }
 
-      const distanceFactor = 1 - radius / this.config.radius;
-      const heightRange = THREE.MathUtils.lerp(
-        this.config.heightRange.base,
-        this.config.thickness * this.config.heightRange.thicknessFactor,
-        distanceFactor
-      );
-      const y = starRandom.floatSpread(heightRange);
-
-      temp.set(Math.cos(theta) * radius, y, Math.sin(theta) * radius);
+      const starMesh = createStarMesh('galaxy', starRandom);
       starMesh.position.copy(temp);
       starMesh.userData.position = temp.clone();
       starMesh.userData.id = i;
@@ -99,6 +148,15 @@ export class GalaxyView {
       starMesh.userData.mesh = starMesh;
       this.group.add(starMesh);
       this.state.galaxyStars.push(starMesh.userData);
+      placedTotal += 1;
+    };
+
+    // Сначала ядро по заданной доле, затем внешний диск/рукава
+    for (let i = 0; i < coreCount; i += 1) {
+      placeStar(i, 'core');
+    }
+    for (let i = coreCount; i < coreCount + outerCount; i += 1) {
+      placeStar(i, 'outer');
     }
   }
 

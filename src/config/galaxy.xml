@@ -1,6 +1,6 @@
 <config name="galaxy" title="Галактика">
-  <entry key="starCount" type="number" description="Количество звёзд, создаваемых при генерации галактики." title="Количество звёзд">200</entry>
-  <entry key="radius" type="number" description="Радиус распределения звёзд относительно центра галактики." title="Радиус галактики">220</entry>
+  <entry key="starCount" type="number" description="Количество звёзд, создаваемых при генерации галактики." title="Количество звёзд">300</entry>
+  <entry key="radius" type="number" description="Радиус распределения звёзд относительно центра галактики." title="Радиус галактики">320</entry>
   <entry key="thickness" type="number" description="Толщина диска галактики вдоль оси Y." title="Толщина диска">14</entry>
   <entry key="rotationSpeed" type="number" description="Скорость вращения звёздного массива в радианах за кадр." title="Скорость вращения">0.01</entry>
   <entry key="groupTilt" type="object" description="Наклон дальних и ближних рукавов для создания объёма." title="Наклон рукавов">
@@ -9,7 +9,7 @@
   </entry>
   <entry key="heightRange" type="object" description="Параметры распределения высоты звёзд над плоскостью галактики." title="Диапазон высот">
     <entry key="base" type="number" description="Базовое значение высоты для звёзд." title="Базовая высота">0.6</entry>
-    <entry key="thicknessFactor" type="number" description="Множитель, влияющий на высоту в зависимости от толщины диска." title="Фактор толщины">0.17</entry>
+    <entry key="thicknessFactor" type="number" description="Множитель, влияющий на высоту в зависимости от толщины диска." title="Фактор толщины">1</entry>
   </entry>
   <entry key="zoom" type="object" description="Настройки масштабирования камеры в режиме галактики." title="Масштаб галактики">
     <entry key="defaultProgress" type="number" description="Начальное значение шкалы приближения при открытии галактической карты." title="Стартовый масштаб">1.7</entry>
@@ -32,7 +32,7 @@
     </entry>
   </entry>
   <entry key="ship" type="object" description="Настройки поведения корабля в галактическом режиме." title="Корабль">
-    <entry key="approachAltitude" type="number" description="Высота, на которую корабль поднимается при приближении к системе." title="Высота подхода">6</entry>
+    <entry key="approachAltitude" type="number" description="Высота, на которую корабль поднимается при приближении к системе." title="Высота подхода">3</entry>
   </entry>
   <entry key="cameraBaseOffset" type="object" description="Базовое смещение камеры при первичной загрузке сцены." title="Базовое смещение камеры">
     <entry key="x" type="number" description="Смещение камеры по оси X." title="Смещение X">0</entry>
@@ -48,13 +48,23 @@
   </entry>
   <entry key="spiral" type="object" description="Параметры спиральной генерации распределения звёзд." title="Спиральная структура">
     <entry key="enabled" type="boolean" description="Включить спиральную генерацию (иначе равномерный диск)." title="Включено">true</entry>
-    <entry key="arms" type="number" description="Количество рукавов галактики." title="Рукава">4</entry>
-    <entry key="twistTurns" type="number" description="Сколько полных оборотов делает рукав от центра к краю." title="Скручивание (обороты)">0.3</entry>
-    <entry key="armSpread" type="number" description="Угловая ширина рукава (рад), шум вокруг центра рукава." title="Ширина рукава (рад)">0.5</entry>
+    <entry key="arms" type="number" description="Количество рукавов галактики." title="Рукава">5</entry>
+    <entry key="twistTurns" type="number" description="Сколько полных оборотов делает рукав от центра к краю." title="Скручивание (обороты)">0.4</entry>
+    <entry key="armSpread" type="number" description="Угловая ширина рукава (рад), шум вокруг центра рукава." title="Ширина рукава (рад)">0.6</entry>
     <entry key="radiusJitter" type="number" description="Случайный разброс радиуса как доля от максимального радиуса." title="Разброс радиуса">0</entry>
     <entry key="radialPower" type="number" description="Плотность по радиусу (меньше 1 — больше звёзд в центре)." title="Степень распределения">1.5</entry>
     <entry key="armOffset" type="number" description="Глобальный фазовый сдвиг рукавов (рад)." title="Смещение фаз">4</entry>
     <entry key="armLength" type="number" description="Длина рукавов как доля от радиуса (0..1). После этой доли рукава постепенно растворяются в случайный диск." title="Длина рукавов">1</entry>
+    <entry key="jitterRelative" type="boolean" description="Масштабировать разброс радиуса пропорционально текущему r (в центре меньше, к краю больше)." title="Относительный шум радиуса">true</entry>
+  </entry>
+  <entry key="placement" type="object" description="Ограничения размещения звёзд." title="Размещение">
+    <entry key="minDistance" type="number" description="Минимальная дистанция между центрами звёзд (в игровых единицах). 0 — без ограничения." title="Мин. дистанция">9</entry>
+    <entry key="maxAttempts" type="number" description="Сколько попыток сделать для поиска позиции, удовлетворяющей мин. дистанции, перед тем как принять последнюю." title="Макс. попыток">12</entry>
+  </entry>
+  <entry key="core" type="object" description="Центральное ядро галактики, где звёзды размещаются случайно (без спиральных правил)." title="Ядро галактики">
+    <entry key="radius" type="number" description="Радиус ядра в игровых единицах. Если &gt;0, имеет приоритет над radiusFactor." title="Радиус">70</entry>
+    <entry key="radiusFactor" type="number" description="Доля от общего радиуса галактики для размера ядра (0..1). Используется, если radius = 0." title="Доля радиуса">0.05</entry>
+    <entry key="fraction" type="number" description="Доля звёзд (0..1), которые должны оказаться внутри ядра. 0 — все по рукавам; 1 — все в ядре." title="Доля в ядре">0.2</entry>
   </entry>
 </config>
 
