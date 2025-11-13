@@ -11,6 +11,8 @@ const cameraOffset = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
 const starWorldPosition = new THREE.Vector3();
 const upDirection = new THREE.Vector3(0, 1, 0);
+// Постоянные векторы для переиспользования
+const lineMidpoint = new THREE.Vector3();
 
 export class GalaxyView {
   constructor(scene, state) {
@@ -263,7 +265,8 @@ export class GalaxyView {
     const topTilt = THREE.MathUtils.degToRad(this.config.groupTilt.far);
     const closeTilt = THREE.MathUtils.degToRad(this.config.groupTilt.near);
     this.group.rotation.x = THREE.MathUtils.lerp(topTilt, closeTilt, zoomNormalized);
-    this.updateHoverVisuals(ship);
+    // Передаём камеру для корректного позиционирования и масштаба подписи
+    this.updateHoverVisuals(ship, camera);
   }
 
   setVisible(value) {
@@ -283,7 +286,7 @@ export class GalaxyView {
     }
   }
 
-  updateHoverVisuals(ship) {
+  updateHoverVisuals(ship, camera) {
     if (!this.group.visible) {
       this.clearHover();
       return;
@@ -301,12 +304,32 @@ export class GalaxyView {
     positions.needsUpdate = true;
     line.visible = true;
 
+    // Текст расстояния в центре линии, «над» полоской в экранных координатах
+    lineMidpoint.copy(shipPosition).add(starWorldPosition).multiplyScalar(0.5);
+
     const distance = shipPosition.distanceTo(starWorldPosition);
     const rounded = distance >= 100 ? distance.toFixed(0) : distance.toFixed(1);
     const distanceLabel = `${rounded} ед.`;
     this.updateLabelTexture(label, distanceLabel);
-    label.position.copy(starWorldPosition);
-    label.position.y += this.hoverSettings.labelOffset;
+
+    // Базовая позиция подписи — середина линии
+    label.position.copy(lineMidpoint);
+
+    // Фиксированный размер подписи в пикселях (обратный зум)
+    const viewportH = Math.max(1, window.innerHeight || 1);
+    const camToLabel = camera.position.distanceTo(label.position);
+    const fovRad = THREE.MathUtils.degToRad(camera.fov);
+    const desiredPx = this.hoverSettings.labelPixelHeight; // пикселей по высоте
+    // высота в мировых единицах, которая даст desiredPx на экране
+    const worldH = 2 * camToLabel * Math.tan(fovRad / 2) * (desiredPx / viewportH);
+    const aspect = (label.userData.canvas?.width || 256) / (label.userData.canvas?.height || 128);
+    label.scale.set(worldH * aspect, worldH, 1);
+
+    // Смещение подписи «над» линией в пикселях, преобразованное в мир вдоль вверх камеры
+    const offsetPx = this.hoverSettings.labelOffsetPx;
+    const worldOffset = 2 * camToLabel * Math.tan(fovRad / 2) * (offsetPx / viewportH);
+    label.position.addScaledVector(camera.up, worldOffset);
+
     label.visible = true;
   }
 
@@ -357,12 +380,16 @@ export class GalaxyView {
       depthWrite: false
     });
     const sprite = new THREE.Sprite(material);
-    sprite.scale.set(26, 13, 1);
+    // Масштаб теперь вычисляется каждый кадр под экранные пиксели
+    // Устанавливаем небольшой стартовый размер, чтобы избежать мерцаний до первого апдейта
+    sprite.scale.set(1, 0.5, 1);
     sprite.visible = false;
     sprite.userData.canvas = canvas;
     sprite.userData.context = context;
     sprite.userData.texture = texture;
     sprite.userData.text = '';
+    // Рендер-приоритет поверх линии
+    sprite.renderOrder = 10;
     return sprite;
   }
 
@@ -386,7 +413,10 @@ export class GalaxyView {
     return {
       lineColor,
       lineOpacity: hover.lineOpacity ?? 0.65,
-      labelOffset: hover.labelOffset ?? 6
+      // смещение подписи в пикселях относительно середины линии вверх по экрану
+      labelOffsetPx: hover.labelOffsetPx ?? 12,
+      // целевая высота подписи в пикселях — фиксированный экранный размер
+      labelPixelHeight: hover.labelPixelHeight ?? 32
     };
   }
 }

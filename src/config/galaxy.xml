@@ -42,7 +42,7 @@
   <entry key="star" type="object" description="Параметры визуализации для взаимодействия." title="Звёзды">
     <entry key="hover" type="object" description="Параметры отображения дистанции при наведении на звезду." title="Наведение">
       <entry key="lineColor" type="string" description="Цвет луча от корабля до звезды." title="Цвет луча">#ffffff</entry>
-      <entry key="lineOpacity" type="number" description="Прозрачность луча." title="Прозрачность луча">0.65</entry>
+      <entry key="lineOpacity" type="number" description="Прозрачность луча." title="Прозрачность луча">0.6</entry>
       <entry key="labelOffset" type="number" description="Высота подписи расстояния над звездой." title="Высота подписи">6</entry>
     </entry>
   </entry>
