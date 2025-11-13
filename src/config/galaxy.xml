@@ -52,7 +52,7 @@
     <entry key="twistTurns" type="number" description="Сколько полных оборотов делает рукав от центра к краю." title="Скручивание (обороты)">0.3</entry>
     <entry key="armSpread" type="number" description="Угловая ширина рукава (рад), шум вокруг центра рукава." title="Ширина рукава (рад)">0.5</entry>
     <entry key="radiusJitter" type="number" description="Случайный разброс радиуса как доля от максимального радиуса." title="Разброс радиуса">0</entry>
-    <entry key="radialPower" type="number" description="Плотность по радиусу (меньше 1 — больше звёзд в центре)." title="Степень распределения">0.5</entry>
+    <entry key="radialPower" type="number" description="Плотность по радиусу (меньше 1 — больше звёзд в центре)." title="Степень распределения">1.5</entry>
     <entry key="armOffset" type="number" description="Глобальный фазовый сдвиг рукавов (рад)." title="Смещение фаз">4</entry>
     <entry key="armLength" type="number" description="Длина рукавов как доля от радиуса (0..1). После этой доли рукава постепенно растворяются в случайный диск." title="Длина рукавов">1</entry>
   </entry>

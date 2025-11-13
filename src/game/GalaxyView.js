@@ -40,8 +40,9 @@ export class GalaxyView {
       : (typeof spiral.twist === 'number' ? spiral.twist : 1.8); // совместимость с возможным ключом twist
     const twistRad = twistTurns * Math.PI * 2; // число оборотов в радианы
     const armSpread = Number.isFinite(spiral.armSpread) ? spiral.armSpread : 0.35; // радианы
-    const radiusJitterRatio = Number.isFinite(spiral.radiusJitter) ? spiral.radiusJitter : 0.06; // доля от R
-    const radialPower = Number.isFinite(spiral.radialPower) ? spiral.radialPower : 0.6; // <1 — больше в центре
+    const radiusJitterRatio = Number.isFinite(spiral.radiusJitter) ? spiral.radiusJitter : 0.06; // доля
+    const jitterRelative = spiral.jitterRelative !== false; // по умолчанию масштабируем разброс по r
+    const radialPower = Number.isFinite(spiral.radialPower) ? spiral.radialPower : 0.8; // 0.5 — равномерно по площади, >0.5 — гуще к центру, <0.5 — гуще к краю
     const armOffset = Number.isFinite(spiral.armOffset) ? spiral.armOffset : 0; // глобальный сдвиг фаз рукавов
     const armLength = THREE.MathUtils.clamp(
       Number.isFinite(spiral.armLength) ? spiral.armLength : 1,
@@ -71,7 +72,9 @@ export class GalaxyView {
         // Плавно смешиваем в случайный диск после armLength, чтобы задать конечную длину рукава
         const blend = THREE.MathUtils.smoothstep(rN, armLength, 1);
         theta = THREE.MathUtils.lerp(thetaSpiralNoisy, randAngle, blend);
-        const rJitter = starRandom.floatSpread(radiusJitterRatio * R);
+        // масштабируем разброс по радиусу: ближе к центру — меньше, к краю — больше
+        const jitterScale = jitterRelative ? r : R;
+        const rJitter = starRandom.floatSpread(radiusJitterRatio * jitterScale);
         radius = THREE.MathUtils.clamp(r + rJitter, 0, R);
       } else {
         // равномерный диск (старый способ)
