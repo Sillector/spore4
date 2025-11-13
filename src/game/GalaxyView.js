@@ -30,12 +30,55 @@ export class GalaxyView {
   populateStars() {
     const temp = new THREE.Vector3();
     this.state.galaxyStars.length = 0;
+
+    // Параметры спиральной генерации с безопасными значениями по умолчанию
+    const spiral = this.config.spiral || {};
+    const spiralEnabled = spiral.enabled !== false; // по умолчанию включено
+    const arms = Math.max(1, Math.floor(spiral.arms ?? 4));
+    const twistTurns = (typeof spiral.twistTurns === 'number')
+      ? spiral.twistTurns
+      : (typeof spiral.twist === 'number' ? spiral.twist : 1.8); // совместимость с возможным ключом twist
+    const twistRad = twistTurns * Math.PI * 2; // число оборотов в радианы
+    const armSpread = Number.isFinite(spiral.armSpread) ? spiral.armSpread : 0.35; // радианы
+    const radiusJitterRatio = Number.isFinite(spiral.radiusJitter) ? spiral.radiusJitter : 0.06; // доля от R
+    const radialPower = Number.isFinite(spiral.radialPower) ? spiral.radialPower : 0.6; // <1 — больше в центре
+    const armOffset = Number.isFinite(spiral.armOffset) ? spiral.armOffset : 0; // глобальный сдвиг фаз рукавов
+    const armLength = THREE.MathUtils.clamp(
+      Number.isFinite(spiral.armLength) ? spiral.armLength : 1,
+      0,
+      1
+    ); // длина рукава как доля от радиуса
+
     for (let i = 0; i < this.config.starCount; i += 1) {
       const starKey = createSeedKey('star', i);
       const starRandom = createWorldRandom('galaxy', starKey);
       const starMesh = createStarMesh('galaxy', starRandom);
-      const radius = Math.sqrt(starRandom.next()) * this.config.radius;
-      const theta = starRandom.float(0, Math.PI * 2);
+
+      let radius, theta;
+      const R = this.config.radius;
+
+      if (spiralEnabled) {
+        // радиус с заданной степенной плотностью
+        const base = starRandom.next();
+        const r = Math.pow(base, Math.max(1e-6, radialPower)) * R;
+        const rN = r / R;
+        const armIndex = Math.floor(starRandom.next() * arms);
+        const armAngle = (armIndex / arms) * Math.PI * 2 + armOffset;
+        const thetaSpiral = armAngle + rN * twistRad;
+        const thetaNoise = starRandom.floatSpread(armSpread);
+        const thetaSpiralNoisy = thetaSpiral + thetaNoise;
+        const randAngle = starRandom.float(0, Math.PI * 2);
+        // Плавно смешиваем в случайный диск после armLength, чтобы задать конечную длину рукава
+        const blend = THREE.MathUtils.smoothstep(rN, armLength, 1);
+        theta = THREE.MathUtils.lerp(thetaSpiralNoisy, randAngle, blend);
+        const rJitter = starRandom.floatSpread(radiusJitterRatio * R);
+        radius = THREE.MathUtils.clamp(r + rJitter, 0, R);
+      } else {
+        // равномерный диск (старый способ)
+        radius = Math.sqrt(starRandom.next()) * R;
+        theta = starRandom.float(0, Math.PI * 2);
+      }
+
       const distanceFactor = 1 - radius / this.config.radius;
       const heightRange = THREE.MathUtils.lerp(
         this.config.heightRange.base,
@@ -43,6 +86,7 @@ export class GalaxyView {
         distanceFactor
       );
       const y = starRandom.floatSpread(heightRange);
+
       temp.set(Math.cos(theta) * radius, y, Math.sin(theta) * radius);
       starMesh.position.copy(temp);
       starMesh.userData.position = temp.clone();

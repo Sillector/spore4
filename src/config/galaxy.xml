@@ -1,10 +1,10 @@
 <config name="galaxy" title="Галактика">
-  <entry key="starCount" type="number" description="Количество звёзд, создаваемых при генерации галактики." title="Количество звёзд">250</entry>
-  <entry key="radius" type="number" description="Радиус распределения звёзд относительно центра галактики." title="Радиус галактики">120</entry>
+  <entry key="starCount" type="number" description="Количество звёзд, создаваемых при генерации галактики." title="Количество звёзд">200</entry>
+  <entry key="radius" type="number" description="Радиус распределения звёзд относительно центра галактики." title="Радиус галактики">220</entry>
   <entry key="thickness" type="number" description="Толщина диска галактики вдоль оси Y." title="Толщина диска">14</entry>
   <entry key="rotationSpeed" type="number" description="Скорость вращения звёздного массива в радианах за кадр." title="Скорость вращения">0.01</entry>
   <entry key="groupTilt" type="object" description="Наклон дальних и ближних рукавов для создания объёма." title="Наклон рукавов">
-    <entry key="far" type="number" description="Наклон дальних групп в градусах относительно плоскости галактики." title="Дальний наклон">78</entry>
+    <entry key="far" type="number" description="Наклон дальних групп в градусах относительно плоскости галактики." title="Дальний наклон">50</entry>
     <entry key="near" type="number" description="Наклон ближних групп в градусах относительно плоскости галактики." title="Ближний наклон">30</entry>
   </entry>
   <entry key="heightRange" type="object" description="Параметры распределения высоты звёзд над плоскостью галактики." title="Диапазон высот">
@@ -45,6 +45,16 @@
       <entry key="lineOpacity" type="number" description="Прозрачность луча." title="Прозрачность луча">0.65</entry>
       <entry key="labelOffset" type="number" description="Высота подписи расстояния над звездой." title="Высота подписи">6</entry>
     </entry>
+  </entry>
+  <entry key="spiral" type="object" description="Параметры спиральной генерации распределения звёзд." title="Спиральная структура">
+    <entry key="enabled" type="boolean" description="Включить спиральную генерацию (иначе равномерный диск)." title="Включено">true</entry>
+    <entry key="arms" type="number" description="Количество рукавов галактики." title="Рукава">4</entry>
+    <entry key="twistTurns" type="number" description="Сколько полных оборотов делает рукав от центра к краю." title="Скручивание (обороты)">0.3</entry>
+    <entry key="armSpread" type="number" description="Угловая ширина рукава (рад), шум вокруг центра рукава." title="Ширина рукава (рад)">0.5</entry>
+    <entry key="radiusJitter" type="number" description="Случайный разброс радиуса как доля от максимального радиуса." title="Разброс радиуса">0</entry>
+    <entry key="radialPower" type="number" description="Плотность по радиусу (меньше 1 — больше звёзд в центре)." title="Степень распределения">0.5</entry>
+    <entry key="armOffset" type="number" description="Глобальный фазовый сдвиг рукавов (рад)." title="Смещение фаз">4</entry>
+    <entry key="armLength" type="number" description="Длина рукавов как доля от радиуса (0..1). После этой доли рукава постепенно растворяются в случайный диск." title="Длина рукавов">1</entry>
   </entry>
 </config>
 
