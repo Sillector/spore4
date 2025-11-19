@@ -1,24 +1,21 @@
 <template>
   <div class="app-shell">
     <div ref="gameRoot" class="game-surface"></div>
-    <section class="info-panel">
-      <h1>Galactic Command</h1>
-      <p>Кликните по звезде, чтобы проложить маршрут. Скролл вниз — переход к системе. Скролл вверх — возврат.</p>
-      <p>Внутри системы кликайте по планетам, чтобы перемещаться. Когда корабль прибудет на орбиту, прокрутите вниз для входа в режим орбиты.</p>
-      <p>На орбите используйте WASD для перемещения по сфере, скролл регулирует высоту.</p>
-    </section>
-    <component v-if="panelComponent" :is="panelComponent" />
+    <ConfigPanel v-if="panelComponent"/>
+    <TopContent/>
+    <BottomContent/>
   </div>
 </template>
 
 <script setup>
-import { defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue';
+import {onBeforeUnmount, onMounted, ref } from 'vue';
 import { createSpaceGame } from './spaceGame.js';
+import ConfigPanel from "./devtools/ConfigPanel.vue";
+import BottomContent from "./components/BottomContent.vue";
+import TopContent from "./components/TopContent.vue";
 
 const gameRoot = ref(null);
-const panelComponent = import.meta.env.DEV
-  ? defineAsyncComponent(() => import('./devtools/ConfigPanel.vue'))
-  : null;
+const panelComponent = !!import.meta.env.DEV;
 let gameInstance = null;
 
 onMounted(() => {
