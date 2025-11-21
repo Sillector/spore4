@@ -1,30 +1,35 @@
 <script setup>
 import ProgressPanel from "./toolbars/ProgressPanel.vue";
 import SystemCard from "./cards/SystemCard.vue";
+import ContactCard from "./cards/ContactCard.vue";
+import InventoryCard from "./cards/InventoryCard.vue";
+import ShipCard from "./cards/ShipCard.vue";
 </script>
 
 <template>
-  <div class="container-fluid bottom-content">
-    <div class="row">
-      <div class="col-3">
-        <SystemCard/>
-      </div>
+  <div class="bottom-content">
+    <v-container fluid>
+      <v-row>
+        <v-col cols="3">
+          <SystemCard/>
+        </v-col>
 
-      <div class="col-2">
-        Созвоны
-      </div>
-      <div class="col-4">
-        Снаряжение
-      </div>
-      <div class="col-3">
-        Корабль
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <ProgressPanel/>
-      </div>
-    </div>
+        <v-col cols="2">
+          <ContactCard/>
+        </v-col>
+        <v-col cols="5">
+          <InventoryCard/>
+        </v-col>
+        <v-col cols="2">
+          <ShipCard/>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-row>
+      <v-col cols="12">
+          <ProgressPanel/>
+      </v-col>
+    </v-row>
   </div>
 </template>
 

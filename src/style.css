@@ -2,7 +2,9 @@
   color-scheme: dark;
   font-family: 'Segoe UI', sans-serif;
 }
-
+html {
+  overflow: hidden !important;
+}
 body {
   margin: 0;
   overflow: hidden;

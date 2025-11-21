@@ -1,11 +1,10 @@
 <script setup>
 
-import BaseCard from "./BaseCard.vue";
 </script>
 
 <template>
   <v-card>
-    <v-card-title>Система</v-card-title>
+    <v-card-title>Корабль</v-card-title>
     <v-card-text>
       <p>Уровень: Система</p>
       <p>Звезда: Alfa-1b</p>

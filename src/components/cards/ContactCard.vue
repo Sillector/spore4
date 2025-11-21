@@ -4,7 +4,7 @@ import BaseCard from "./BaseCard.vue";
 </script>
 
 <template>
-  <v-card>
+  <v-card v-if="false">
     <v-card-title>Система</v-card-title>
     <v-card-text>
       <p>Уровень: Система</p>

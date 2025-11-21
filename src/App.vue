@@ -1,14 +1,16 @@
 <template>
-  <div class="app-shell">
-    <div ref="gameRoot" class="game-surface"></div>
-    <ConfigPanel v-if="panelComponent"/>
-    <TopContent/>
-    <BottomContent/>
-  </div>
+  <v-app>
+    <div class="app-shell">
+      <div ref="gameRoot" class="game-surface"></div>
+      <ConfigPanel v-if="panelComponent" />
+      <TopContent />
+      <BottomContent />
+    </div>
+  </v-app>
 </template>
 
 <script setup>
-import {onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { createSpaceGame } from './spaceGame.js';
 import ConfigPanel from "./devtools/ConfigPanel.vue";
 import BottomContent from "./components/BottomContent.vue";

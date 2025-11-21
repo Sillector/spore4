@@ -3,27 +3,25 @@
 </script>
 
 <template>
-  <div class="row">
-    <div class="col-2 money">
-      <span>112 000 $</span>
-    </div>
-    <div class="col-10 user-progress">
-      <div class="progress">
-        <div
-          class="progress-bar"
-          role="progressbar"
-          :style="{ width: '45%' }"
-          aria-valuenow="45"
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          Уровень 12 (45%)
+  <v-card>
+    <v-container fluid class="py-0">
+      <v-row>
+        <v-col cols="2">
+          <span>112 000 $</span>
+        </v-col>
+        <v-col cols="10">
+          <v-progress-linear
+              :value="45"
+              height="20"
+              color="blue"
+          >
+            Уровень 12 (45%)
+          </v-progress-linear>
+        </v-col>
+      </v-row>
+    </v-container>
 
-        </div>
-      </div>
-
-    </div>
-  </div>
+  </v-card>
 </template>
 
 <style scoped>

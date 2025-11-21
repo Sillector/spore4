@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import vuetify from 'vite-plugin-vuetify';
 import { parseConfigXml, serializeConfigXml } from './src/config/xml.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -63,5 +64,5 @@ function createConfigWriter() {
 }
 
 export default defineConfig({
-  plugins: [vue(), createConfigWriter()]
+  plugins: [vue(), vuetify({ autoImport: true }), createConfigWriter()]
 });

@@ -5,7 +5,7 @@ import BaseCard from "./BaseCard.vue";
 
 <template>
   <v-card>
-    <v-card-title>Система</v-card-title>
+    <v-card-title>Снаряжение</v-card-title>
     <v-card-text>
       <p>Уровень: Система</p>
       <p>Звезда: Alfa-1b</p>
